@@ -1,0 +1,7 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Login — TitikAman</title>
+<style>body{font-family:system-ui;background:#0f172a;color:#e2e8f0;display:flex;justify-content:center;padding:40px} .card{background:#1e293b;padding:20px;border-radius:12px;width:340px} input{width:100%;padding:9px;margin:6px 0;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff} button{background:#2eb5a6;padding:10px;width:100%;border:0;border-radius:8px;font-weight:700;cursor:pointer} pre{font-size:12px;white-space:pre-wrap}</style></head>
+<body><div class="card"><h2>Admin TitikAman</h2><p style="font-size:13px">Demo: admin@titikaman.id / Admin123!</p>
+<input id="email" value="admin@titikaman.id"><input id="pass" type="password" value="Admin123!"><button onclick="login()">Login Admin</button><pre id="out"></pre>
+<p style="font-size:12px"><a href="/test" style="color:#5eead4">← ke halaman tes</a> · Dashboard API: GET /api/v1/admin/dashboard (Bearer token admin)</p>
+<script>async function login(){ const r=await fetch('/api/v1/admin/login',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({email:document.getElementById('email').value,password:document.getElementById('pass').value})}); const j=await r.json(); document.getElementById('out').textContent=JSON.stringify(j,null,2); if(j.data?.token) localStorage.setItem('ta_admin_token',j.data.token); }</script>
+</div></body></html>
