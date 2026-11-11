@@ -125,7 +125,7 @@
                         </li>
                     </ul>
 
-                    <!-- Card Bantuan / Status Grid -->
+                    <!-- Card Status Grid & API -->
                     <div class="p-3 bg-light rounded-4 border-0 mb-3">
                         <small class="fw-bold text-dark d-block">Status API & Grid</small>
                         <small class="text-success fw-semibold" style="font-size: 11px;">
@@ -162,16 +162,23 @@
                         <small class="text-uppercase text-muted fw-bold" style="font-size: 11px;">CIVIC SAFETY COMMAND CENTER</small>
                         <h3 class="fw-bold text-dark mb-0">Selamat datang, <span id="adminGreeting">Admin</span></h3>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <!-- Switch Mode Simulasi Lokasi Uji Juri (FR-02.1) -->
+                        <div class="form-check form-switch bg-white px-3 py-2 rounded-pill shadow-sm border d-flex align-items-center gap-2 mb-0" title="Aktifkan agar juri dapat menguji fitur pelaporan tanpa batasan radius geofence 20 meter">
+                            <input class="form-check-input ms-0 mt-0 cursor-pointer" type="checkbox" role="switch" id="switchSimulation" onchange="toggleSimulationMode(this.checked)">
+                            <label class="form-check-label small fw-semibold text-secondary" for="switchSimulation" id="labelSimulation">Simulasi: ...</label>
+                        </div>
+
+                        <!-- Tombol Buka Panel Pemantauan SOS (FR-04.4) -->
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 fw-semibold shadow-sm d-flex align-items-center gap-1" onclick="openAdminSosModal()">
+                            <i class="bi bi-telephone-fill"></i> Panel SOS <span class="badge bg-danger rounded-pill ms-1" id="sosCountBtn">0</span>
+                        </button>
+
+                        <!-- Pilihan Wilayah -->
                         <div class="bg-white p-1 rounded-pill shadow-sm border d-flex gap-1" id="regionBtnGroup">
                             <button class="btn btn-sm btn-success rounded-pill px-3 fw-semibold region-toggle" data-region="unesa-lidah-wetan">UNESA Lidah Wetan</button>
                             <button class="btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold region-toggle" data-region="unesa-ketintang">UNESA Ketintang</button>
                             <button class="btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold region-toggle" data-region="rawamangun">Rawamangun</button>
-                        </div>
-                        <div id="sosAlertBadge" class="d-none">
-                            <span class="badge bg-danger rounded-pill px-3 py-2 animate-pulse">
-                                <i class="bi bi-exclamation-octagon-fill me-1"></i> SOS AKTIF
-                            </span>
                         </div>
                     </div>
                 </div>
@@ -214,7 +221,7 @@
                             <small class="text-secondary fw-semibold" style="font-size: 11px;" id="statPendingSub">-</small>
                         </div>
                     </div>
-                    <div class="col-6 col-lg-3">
+                    <div class="col-6 col-lg-3" style="cursor: pointer;" onclick="openAdminSosModal()" title="Klik untuk membuka panel SOS">
                         <div class="metric-card p-3 shadow-sm">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <span class="text-muted small fw-semibold">Alert SOS Terbuka</span>
@@ -222,7 +229,7 @@
                                     <i class="bi bi-telephone-fill"></i>
                                 </div>
                             </div>
-                            <h2 class="fw-bold text-dark mb-0" id="statSosOpen">-</h2>
+                            <h2 class="fw-bold text-danger mb-0" id="statSosOpen">-</h2>
                             <small class="text-danger fw-semibold" style="font-size: 11px;" id="statSosOpenSub">-</small>
                         </div>
                     </div>
@@ -238,7 +245,7 @@
                                     <h6 class="fw-bold text-dark mb-0">Patrol Heatmap • <span id="judulLokasiMap">UNESA Lidah Wetan</span></h6>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-light text-secondary border" id="heatmapCellCount">0 grid aktif</span>
+                                    <span class="badge bg-light text-secondary border" id="heatmapCellCount">0 grid intensitas</span>
                                 </div>
                             </div>
                             <div class="map-heatmap-container">
@@ -276,17 +283,23 @@
                     </div>
                 </div>
 
-                <!-- SECTION: ANTRIAN PEMERIKSAAN - MODERASI LAPORAN (Tahap 3 Preview) -->
+                <!-- SECTION: ANTRIAN PEMERIKSAAN & AKSI MODERASI (FR-04.3 & FR-04.4) -->
                 <div class="bg-white p-4 rounded-4 border shadow-sm" id="moderasiSection">
                     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                         <div>
                             <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">ANTRIAN PEMERIKSAAN LAPORAN</small>
-                            <h5 class="fw-bold text-dark mb-0">Laporan Terbaru Wilayah</h5>
+                            <h5 class="fw-bold text-dark mb-0">Moderasi Laporan Warga</h5>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
-                                <i class="bi bi-info-circle me-1"></i> Aksi moderasi lengkap di Tahap 3
-                            </span>
+                            <label for="filterStatus" class="small fw-semibold text-secondary mb-0">Filter Status:</label>
+                            <select class="form-select form-select-sm bg-light border-0 fw-semibold rounded-pill px-3" id="filterStatus" onchange="filterReportsByStatus()" style="width: 180px;">
+                                <option value="all">Semua Status</option>
+                                <option value="PENDING_MODERATION">Perlu Moderasi</option>
+                                <option value="UNVERIFIED">Belum Verifikasi</option>
+                                <option value="VERIFIED">Terverifikasi</option>
+                                <option value="RESOLVED">Selesai Ditangani</option>
+                                <option value="HIDDEN">Disembunyikan</option>
+                            </select>
                         </div>
                     </div>
 
@@ -294,17 +307,16 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="text-muted border-bottom" style="font-size: 12px; background-color: #fafbfc;">
                                 <tr>
-                                    <th class="py-3">ID LAPORAN</th>
+                                    <th class="py-3">LAPORAN</th>
                                     <th class="py-3">WILAYAH</th>
                                     <th class="py-3">KATEGORI</th>
-                                    <th class="py-3">VALIDASI KOMUNITAS</th>
-                                    <th class="py-3">STATUS</th>
-                                    <th class="py-3 text-end">WAKTU</th>
+                                    <th class="py-3">STATUS & UP-CHECK</th>
+                                    <th class="py-3 text-end" style="min-width: 280px;">AKSI CEPAT MODERASI (1-KLIK)</th>
                                 </tr>
                             </thead>
                             <tbody style="font-size: 14px;" id="reportsTableBody">
                                 <tr>
-                                    <td colspan="6" class="text-center py-4 text-muted small">
+                                    <td colspan="5" class="text-center py-4 text-muted small">
                                         <span class="spinner-border spinner-border-sm me-1" role="status"></span> Memuat daftar laporan...
                                     </td>
                                 </tr>
@@ -315,6 +327,41 @@
 
             </div>
 
+        </div>
+    </div>
+
+    <!-- Modal Panel Pemantauan & Penanganan SOS Admin (FR-04.4) -->
+    <div class="modal fade" id="adminSosModal" tabindex="-1" aria-labelledby="adminSosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-danger text-white border-0 rounded-top-4">
+                    <h5 class="modal-title fw-bold" id="adminSosModalLabel">
+                        <i class="bi bi-exclamation-octagon-fill me-2"></i> Pemantauan Sinyal Darurat SOS (FR-04.4)
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-warning py-2 small mb-3 border-0 bg-warning-subtle text-warning-emphasis">
+                        <i class="bi bi-info-circle-fill me-1"></i> Alert ini dikirim oleh warga dari peta navigasi. Pastikan tindak lanjut koordinasi darurat ke pihak berwajib atau pos satpam terdekat.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="text-muted border-bottom small">
+                                <tr>
+                                    <th>WAKTU</th>
+                                    <th>WILAYAH</th>
+                                    <th>PESAN / KOORDINAT</th>
+                                    <th>STATUS</th>
+                                    <th class="text-end">TINDAKAN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sosTableBody">
+                                <tr><td colspan="5" class="text-center py-4 text-muted small"><span class="spinner-border spinner-border-sm me-1"></span> Memuat sinyal SOS...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -337,6 +384,8 @@
         };
 
         let activeRegion = 'unesa-lidah-wetan';
+        let rawReportsList = [];
+        let sosModalInstance = null;
         const adminMap = L.map('adminMap').setView(regionConfigs[activeRegion].center, regionConfigs[activeRegion].zoom);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -394,6 +443,52 @@
             }
         }
 
+        // 1. Cek & Toggle Mode Simulasi Juri (FR-02.1)
+        async function loadSimulationStatus() {
+            try {
+                const res = await fetch(`${adminApi}/simulation`, { headers: { 'Accept': 'application/json' } });
+                if (res.ok) {
+                    const json = await res.json();
+                    const enabled = Boolean(json.data?.simulation_mode);
+                    const sw = document.getElementById('switchSimulation');
+                    const lbl = document.getElementById('labelSimulation');
+                    if (sw) sw.checked = enabled;
+                    if (lbl) {
+                        lbl.textContent = enabled ? 'Simulasi: AKTIF' : 'Simulasi: Nonaktif';
+                        lbl.className = enabled ? 'form-check-label small fw-semibold text-success' : 'form-check-label small fw-semibold text-secondary';
+                    }
+                }
+            } catch (e) {
+                console.warn('Gagal memuat status simulasi:', e);
+            }
+        }
+
+        async function toggleSimulationMode(checked) {
+            const lbl = document.getElementById('labelSimulation');
+            if (lbl) lbl.textContent = 'Menyimpan...';
+
+            try {
+                const res = await fetch(`${adminApi}/admin/simulation`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify({ enabled: checked })
+                });
+
+                const json = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(json.message || 'Gagal mengubah status simulasi.');
+
+                loadSimulationStatus();
+                alert(checked ? 'Mode Simulasi Lokasi Uji Juri telah DIAKTIFKAN. Geofence 20 m dilewati untuk pengujian juri.' : 'Mode Simulasi Lokasi dinonaktifkan.');
+            } catch (err) {
+                alert(err.message);
+                loadSimulationStatus();
+            }
+        }
+
         async function loadAdminDashboard(regionSlug) {
             activeRegion = regionSlug;
             const regionInfo = regionConfigs[regionSlug] || { name: regionSlug, center: [-7.30071, 112.67289], zoom: 14 };
@@ -446,16 +541,10 @@
                 document.getElementById('badgePendingModeration').textContent = pendingModeration;
 
                 document.getElementById('statSosOpen').textContent = sosOpen;
-                document.getElementById('statSosOpenSub').textContent = sosOpen > 0 ? 'Darurat aktif!' : 'Tidak ada sinyal aktif';
+                document.getElementById('statSosOpenSub').textContent = sosOpen > 0 ? 'Darurat aktif! Klik untuk buka' : 'Tidak ada alert aktif';
+                document.getElementById('sosCountBtn').textContent = sosOpen;
 
-                const sosBadge = document.getElementById('sosAlertBadge');
-                if (sosOpen > 0) {
-                    sosBadge.classList.remove('d-none');
-                } else {
-                    sosBadge.classList.add('d-none');
-                }
-
-                // 2. Render Patrol Heatmap Kerapatan Laporan (FR-04.2)
+                // 2. Render Heatmap Kerapatan Laporan (FR-04.2)
                 heatmapLayer.clearLayers();
                 const heatmapCells = Array.isArray(data.heatmap) ? data.heatmap : [];
                 document.getElementById('heatmapCellCount').textContent = `${heatmapCells.length} grid intensitas`;
@@ -500,11 +589,12 @@
                     });
                 }
 
-                // 4. Render Live Feed (recent_reports & sos_alerts)
+                // 4. Render Live Feed
                 renderLiveFeed(data.recent_reports || [], data.sos_alerts || []);
 
-                // 5. Render Tabel Laporan Terbaru
-                renderReportsTable(data.recent_reports || []);
+                // 5. Simpan & Render Tabel Laporan
+                rawReportsList = data.recent_reports || [];
+                filterReportsByStatus();
 
                 document.getElementById('lastUpdatedHeatmap').textContent = `Diperbarui ${new Date().toLocaleTimeString('id-ID')}`;
 
@@ -520,7 +610,6 @@
 
             let html = '';
 
-            // Tampilkan SOS Alerts jika ada
             sosAlerts.slice(0, 3).forEach(sos => {
                 const isOpen = sos.status === 'open';
                 html += `
@@ -540,7 +629,6 @@
                 `;
             });
 
-            // Tampilkan Recent Reports
             if (recentReports.length === 0 && sosAlerts.length === 0) {
                 container.innerHTML = '<div class="text-center py-4 text-muted small">Belum ada aktivitas laporan baru.</div>';
                 return;
@@ -569,37 +657,213 @@
             container.innerHTML = html;
         }
 
+        // Filter tabel moderasi
+        function filterReportsByStatus() {
+            const filter = document.getElementById('filterStatus')?.value || 'all';
+            let filtered = rawReportsList;
+            if (filter !== 'all') {
+                filtered = rawReportsList.filter(r => r.status === filter);
+            }
+            renderReportsTable(filtered);
+        }
+
         function renderReportsTable(reports) {
             const tbody = document.getElementById('reportsTableBody');
             if (!tbody) return;
 
             if (reports.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted small">Tidak ada laporan pada wilayah ini.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted small">Tidak ada laporan dengan filter status ini.</td></tr>';
                 return;
             }
 
             let html = '';
             reports.forEach(rep => {
-                const badgeClass = rep.status === 'VERIFIED' ? 'bg-success' : (rep.status === 'PENDING_MODERATION' ? 'bg-warning text-dark' : 'bg-secondary');
+                const badgeClass = rep.status === 'VERIFIED' ? 'bg-success' : (rep.status === 'PENDING_MODERATION' ? 'bg-warning text-dark' : (rep.status === 'RESOLVED' ? 'bg-info text-dark' : (rep.status === 'HIDDEN' ? 'bg-dark' : 'bg-secondary')));
+                
                 html += `
                     <tr>
                         <td class="py-3">
-                            <span class="fw-bold text-dark">#${rep.id}</span>
+                            <strong class="text-dark d-block">#${rep.id} · ${escapeHtml(rep.label || rep.category)}</strong>
+                            <small class="text-muted d-block text-truncate" style="max-width: 250px;">${escapeHtml(rep.description || 'Tidak ada deskripsi.')}</small>
                         </td>
                         <td><span class="badge bg-light text-dark border">${escapeHtml(rep.region_slug)}</span></td>
-                        <td>${escapeHtml(rep.label || rep.category)}</td>
+                        <td><small class="text-secondary fw-semibold">${escapeHtml(rep.category)}</small></td>
                         <td>
-                            <span class="badge bg-success-subtle text-success px-2 py-1 rounded">
-                                <i class="bi bi-hand-thumbs-up me-1"></i>${rep.upvotes_count || 0} Up-Check
-                            </span>
+                            <span class="badge ${badgeClass} px-2 py-1 rounded-pill mb-1" style="font-size: 10px;">${escapeHtml(rep.status)}</span><br>
+                            <small class="text-muted"><i class="bi bi-hand-thumbs-up me-1"></i>${rep.upvotes_count || 0} Upvote</small>
                         </td>
-                        <td><span class="badge ${badgeClass} px-3 py-1 rounded-pill" style="font-size: 11px;">${escapeHtml(rep.status)}</span></td>
-                        <td class="text-end text-muted small">${formatTimeAgo(rep.created_at)}</td>
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-1 flex-wrap">
+                                ${rep.status !== 'VERIFIED' ? `
+                                    <button class="btn btn-sm btn-outline-success rounded-pill px-2 py-1 fw-semibold" style="font-size: 11px;" onclick="verifyReport(${rep.id})" title="Official Verification (1-Klik)">
+                                        <i class="bi bi-patch-check-fill me-1"></i>Verifikasi
+                                    </button>
+                                ` : ''}
+                                ${rep.status !== 'RESOLVED' ? `
+                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-2 py-1 fw-semibold" style="font-size: 11px;" onclick="resolveReport(${rep.id})" title="Tandai Masalah Jalan Selesai Ditangani">
+                                        <i class="bi bi-check-lg me-1"></i>Selesai
+                                    </button>
+                                ` : ''}
+                                ${rep.status !== 'HIDDEN' ? `
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1 fw-semibold" style="font-size: 11px;" onclick="hideReport(${rep.id})" title="Sembunyikan Laporan Hoax/Spam">
+                                        <i class="bi bi-eye-slash-fill me-1"></i>Hoax
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-sm btn-success rounded-pill px-2 py-1 fw-semibold shadow-sm" style="font-size: 11px;" onclick="waFollowupReport(${rep.id})" title="Kirim Tindak Lanjut ke WhatsApp RT/Kelurahan/Satpam (FR-04.4)">
+                                    <i class="bi bi-whatsapp me-1"></i>WA RT
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
 
             tbody.innerHTML = html;
+        }
+
+        // AKSI MODERASI (1-KLIK)
+        async function verifyReport(reportId) {
+            if (!confirm(`Berikan Official Verification badge pada laporan #${reportId}?`)) return;
+            try {
+                const res = await fetch(`${adminApi}/admin/reports/${reportId}/verify`, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${adminToken}` }
+                });
+                const json = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(json.message || 'Gagal memverifikasi laporan.');
+                alert(json.message || 'Laporan berhasil diverifikasi!');
+                loadAdminDashboard(activeRegion);
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        async function resolveReport(reportId) {
+            if (!confirm(`Tandai laporan #${reportId} sebagai RESOLVED (selesai ditangani)?`)) return;
+            try {
+                const res = await fetch(`${adminApi}/admin/reports/${reportId}/resolve`, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${adminToken}` }
+                });
+                const json = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(json.message || 'Gagal menandai laporan selesai.');
+                alert(json.message || 'Laporan ditandai selesai.');
+                loadAdminDashboard(activeRegion);
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        async function hideReport(reportId) {
+            if (!confirm(`Sembunyikan laporan #${reportId} (spam/hoax)? Laporan ini tidak akan tampil di publik.`)) return;
+            try {
+                const res = await fetch(`${adminApi}/admin/reports/${reportId}/hide`, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${adminToken}` }
+                });
+                const json = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(json.message || 'Gagal menyembunyikan laporan.');
+                alert(json.message || 'Laporan berhasil disembunyikan.');
+                loadAdminDashboard(activeRegion);
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // Tindak Lanjut WhatsApp RT/Kelurahan/Satpam (FR-04.4)
+        async function waFollowupReport(reportId) {
+            try {
+                const res = await fetch(`${adminApi}/admin/reports/${reportId}/wa-followup`, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${adminToken}` }
+                });
+                const json = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(json.message || 'Gagal membuat pesan WhatsApp.');
+                
+                const waUrl = json.data?.wa_url;
+                if (waUrl) {
+                    window.open(waUrl, '_blank');
+                } else {
+                    alert('Teks WhatsApp:\n\n' + json.data?.wa_text);
+                }
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // MODAL & PENANGANAN SOS (FR-04.4)
+        function openAdminSosModal() {
+            if (!sosModalInstance) {
+                sosModalInstance = new bootstrap.Modal(document.getElementById('adminSosModal'));
+            }
+            loadSosAlertsList();
+            sosModalInstance.show();
+        }
+
+        async function loadSosAlertsList() {
+            const tbody = document.getElementById('sosTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted small"><span class="spinner-border spinner-border-sm me-1"></span> Mengambil data SOS...</td></tr>';
+
+            try {
+                const res = await fetch(`${adminApi}/admin/sos`, {
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${adminToken}` }
+                });
+                if (!res.ok) throw new Error('Gagal memuat daftar SOS.');
+                const payload = await res.json();
+                const list = payload.data?.data || payload.data || [];
+
+                if (list.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted small">Tidak ada riwayat sinyal darurat SOS.</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                list.forEach(item => {
+                    const isOpen = item.status === 'open';
+                    html += `
+                        <tr>
+                            <td class="small text-muted">${formatTimeAgo(item.created_at)}</td>
+                            <td><span class="badge bg-light text-dark border">${escapeHtml(item.region_slug || 'Global')}</span></td>
+                            <td>
+                                <strong class="d-block small text-dark">${escapeHtml(item.message || 'SOS Emergency')}</strong>
+                                <small class="text-muted">Koordinat: ${item.lat ? `${item.lat}, ${item.lng}` : 'Tidak ada koordinat'}</small>
+                            </td>
+                            <td>
+                                <span class="badge ${isOpen ? 'bg-danger' : 'bg-success'} rounded-pill">${escapeHtml(item.status)}</span>
+                            </td>
+                            <td class="text-end">
+                                ${isOpen ? `
+                                    <button class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" style="font-size: 11px;" onclick="resolveSosAlert(${item.id})">
+                                        <i class="bi bi-check2-circle me-1"></i>Tandai Selesai
+                                    </button>
+                                ` : `
+                                    <span class="text-muted small"><i class="bi bi-check-all text-success me-1"></i>Tertangani</span>
+                                `}
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger small py-3">${err.message}</td></tr>`;
+            }
+        }
+
+        async function resolveSosAlert(sosId) {
+            if (!confirm(`Tutup dan tandai alert SOS #${sosId} sebagai selesai?`)) return;
+            try {
+                const res = await fetch(`${adminApi}/admin/sos/${sosId}/resolve`, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${adminToken}` }
+                });
+                const json = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(json.message || 'Gagal menyelesaikan SOS.');
+                alert('Alert SOS telah diselesaikan.');
+                loadSosAlertsList();
+                loadAdminDashboard(activeRegion);
+            } catch (err) {
+                alert(err.message);
+            }
         }
 
         async function adminLogout() {
@@ -618,7 +882,7 @@
             }
         }
 
-        // Event listener pilihan wilayah
+        // Event listener tombol pilihan wilayah
         document.querySelectorAll('.region-toggle').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.region-toggle').forEach(b => {
@@ -631,6 +895,7 @@
 
         // Inisialisasi awal
         loadAdminProfile();
+        loadSimulationStatus();
         loadAdminDashboard(activeRegion);
     </script>
 </body>
