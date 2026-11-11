@@ -46,7 +46,9 @@ class ReportController extends Controller {
         $aiResult=$ai->check($photoPath,['category'=>$d['category']]);
         if(isset($aiResult['has_face']) && $aiResult['has_face'] || isset($aiResult['has_plate']) && $aiResult['has_plate'])
             return response()->json(['success'=>false,'message'=>'Foto ditolak AI: menampilkan wajah / plat nomor secara jelas (privasi, FR-02.3). Ambil ulang tanpa wajah/plat.','ai_check'=>$aiResult],422);
-        $status = ($aiResult['source'] ?? 'stub')==='stub' ? 'PENDING_MODERATION' : 'UNVERIFIED';
+        $status = in_array($aiResult['source'] ?? '', ['stub', 'gemini_error'], true)
+            ? 'PENDING_MODERATION'
+            : 'UNVERIFIED';
         // Catatan: stub = belum ada cek Gemini sungguhan, jadi status awal PENDING_MODERATION (FR-02.7).
         $rep=Report::create([
             'user_id'=>$r->user()->id,'region_slug'=>$d['region_slug'],'category'=>$d['category'],

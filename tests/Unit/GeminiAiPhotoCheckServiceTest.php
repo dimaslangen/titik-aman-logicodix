@@ -23,7 +23,7 @@ class GeminiAiPhotoCheckServiceTest extends TestCase
             'darkness' => 'unknown',
             'has_face' => false,
             'has_plate' => false,
-            'reason' => 'Gemini API Timeout / Error: Fallback ke moderasi manual.',
+            'reason' => 'Gemini API Error/Timeout: Fallback ke moderasi manual.',
             'raw' => null,
             'source' => 'gemini_error',
         ], $result);
