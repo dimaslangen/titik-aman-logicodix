@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn()=> redirect('/test'));
+Route::get('/', fn()=> redirect('/masuk'));
 Route::get('/admin/login', fn()=> view('admin-login'));
 
 Route::get('/masuk', fn() => view('auth'));

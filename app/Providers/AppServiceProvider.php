@@ -1,17 +1,23 @@
 <?php
+
 namespace App\Providers;
-use Illuminate\Support\ServiceProvider;
+
 use App\Services\AiPhotoCheckService;
-use App\Services\StubAiPhotoCheckService;
+use App\Services\GeminiAiPhotoCheckService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
-class AppServiceProvider extends ServiceProvider {
-    public function register(): void {
-        // Gemini: STUB sampai Rafa pasang implementasi asli. Ganti binding ini saja.
-        $this->app->bind(AiPhotoCheckService::class, StubAiPhotoCheckService::class);
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->app->bind(AiPhotoCheckService::class, GeminiAiPhotoCheckService::class);
     }
-    public function boot(): void {
+
+    public function boot(): void
+    {
         RateLimiter::for('reports', function (Request $request) {
             return Limit::perHour(3)->by($request->user()?->id ?: $request->ip());
         });
