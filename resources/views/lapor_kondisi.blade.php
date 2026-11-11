@@ -85,12 +85,17 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="/safety-hubs-ui" class="nav-link py-2 px-3">
+                                <i class="bi bi-building me-2"></i> Safety Hub
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="/lapor-kondisi" class="nav-link active py-2 px-3">
                                 <i class="bi bi-exclamation-triangle me-2"></i> Lapor Kondisi
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link py-2 px-3">
+                            <a href="/admin" class="nav-link py-2 px-3">
                                 <i class="bi bi-shield-lock me-2"></i> Admin
                             </a>
                         </li>
@@ -120,7 +125,10 @@
                             <h4 class="fw-bold mb-0 text-dark">Lapor Kondisi</h4>
                         </div>
                     </div>
-                    <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="badgeSimulationMode" class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 rounded-pill d-none">
+                            <i class="bi bi-cpu-fill me-1"></i> SIMULASI JURI AKTIF (BYPASS RADIUS)
+                        </span>
                         <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
                             <i class="bi bi-geo-alt-fill me-1"></i> GPS VALID
                         </span>
@@ -369,8 +377,39 @@
             });
             const payload = await response.json().catch(() => ({}));
             if (response.status === 401) throw new Error('Sesi login berakhir. Silakan masuk kembali.');
+
+            // Handle 409 Conflict - Deteksi laporan duplikat dalam radius 20 meter
+            if (response.status === 409 && payload.duplicate_report_id) {
+                const desc = payload.duplicate_report?.description ? `"${payload.duplicate_report.description}"` : 'laporan di titik ini';
+                const confirmUpcheck = confirm(
+                    `Laporan serupa sudah dilaporkan dalam radius ≤ 20m:\n` +
+                    `${desc}\n\n` +
+                    `Apakah Anda ingin memberikan Up-Check (konfirmasi) untuk laporan yang sudah ada tersebut?`
+                );
+                if (confirmUpcheck) {
+                    status.textContent = 'Mengirimkan Up-Check untuk laporan terdekat...';
+                    const upResponse = await fetch(`/api/v1/reports/${payload.duplicate_report_id}/upvote`, {
+                        method: 'POST',
+                        headers: {Accept: 'application/json', Authorization: `Bearer ${token}`}
+                    });
+                    const upPayload = await upResponse.json().catch(() => ({}));
+                    if (!upResponse.ok) throw new Error(upPayload.message || 'Gagal memberikan Up-Check.');
+                    alert(upPayload.message || 'Berhasil memberikan Up-Check pada laporan yang ada!');
+                    window.location.href = '/app';
+                    return;
+                } else {
+                    status.textContent = 'Pengiriman laporan dibatalkan (terdeteksi duplikat).';
+                    return;
+                }
+            }
+
             if (!response.ok) throw new Error(payload.message || 'Laporan gagal dikirim.');
-            alert(payload.message || 'Laporan berhasil dikirim.');
+
+            let successMsg = payload.message || 'Laporan berhasil dikirim.';
+            if (payload.ai_check) {
+                successMsg += `\n\n[Analisis AI Gemini]\nStatus: ${payload.ai_check.status}\nCatatan: ${payload.ai_check.notes || '-'}`;
+            }
+            alert(successMsg);
             window.location.href = '/app';
         } catch (error) {
             status.textContent = '';
@@ -385,6 +424,17 @@
         if (btnKirim) {
             btnKirim.addEventListener('click', kirimLaporan);
         }
+
+        // Cek status mode simulasi juri
+        fetch('/api/v1/simulation', {headers: {Accept: 'application/json'}})
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.simulation_mode) {
+                    const simBadge = document.getElementById('badgeSimulationMode');
+                    if (simBadge) simBadge.classList.remove('d-none');
+                }
+            })
+            .catch(() => {});
         fetch('/api/v1/regions', {headers: {Accept: 'application/json'}})
             .then(response => response.ok ? response.json() : Promise.reject(new Error('Region gagal dimuat.')))
             .then(payload => {
