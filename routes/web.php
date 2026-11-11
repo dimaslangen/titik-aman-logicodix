@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn()=> redirect('/masuk'));
-Route::get('/admin/login', fn()=> view('admin-login'));
+Route::get('/', fn()=> redirect('/app'));
+Route::get('/admin/login', fn()=> redirect('/masuk'));
 
 Route::get('/masuk', fn() => view('auth'));
 Route::get('/daftar', fn() => view('auth'));

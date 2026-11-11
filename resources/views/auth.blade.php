@@ -47,7 +47,7 @@ a:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(-
     <button class="btn" id="go" type="submit">Masuk</button>
   </form>
   <p class="alt" id="alt"></p>
-  <p class="alt"><a href="/admin/login">Masuk sebagai petugas</a> · <a href="/app">Lanjut tanpa akun</a></p>
+  <p class="alt"><a href="/app">Lanjut tanpa akun (Jelajahi Peta)</a></p>
 </div></main>
 <script>
 const API='/api/v1',up=location.pathname.indexOf('/daftar')===0,$=id=>document.getElementById(id);
@@ -71,7 +71,14 @@ $('f').onsubmit=async e=>{
     const j=await r.json().catch(()=>({}));
     if(r.status===429)throw new Error('Terlalu banyak percobaan. Tunggu 1 menit lalu coba lagi.');
     if(!r.ok){const first=j.errors&&Object.values(j.errors)[0];throw new Error((first&&first[0])||j.message||'Gagal. Coba lagi.')}
-    localStorage.setItem('ta_token',j.data.token);location.href='/app';
+    const userRole = j.data?.user?.role;
+    localStorage.setItem('ta_token', j.data.token);
+    if (userRole === 'admin') {
+      localStorage.setItem('ta_admin_token', j.data.token);
+      location.href = '/admin';
+    } else {
+      location.href = '/app';
+    }
   }catch(err){$('err').textContent=err.message}
   finally{$('go').disabled=false}
 };

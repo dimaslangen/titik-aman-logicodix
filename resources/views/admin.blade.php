@@ -370,11 +370,11 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const adminApi = '/api/v1';
-        const adminToken = localStorage.getItem('ta_admin_token');
+        const adminToken = localStorage.getItem('ta_admin_token') || localStorage.getItem('ta_token');
 
-        // Guard autentikasi admin: jika tidak ada token, arahkan ke login admin
+        // Guard autentikasi admin: jika tidak ada token, arahkan ke halaman login
         if (!adminToken) {
-            window.location.href = '/admin/login';
+            window.location.href = '/masuk';
         }
 
         const regionConfigs = {
@@ -424,7 +424,8 @@
 
                 if (response.status === 401 || response.status === 403) {
                     localStorage.removeItem('ta_admin_token');
-                    window.location.href = '/admin/login';
+                    localStorage.removeItem('ta_token');
+                    window.location.href = '/masuk';
                     return;
                 }
 
@@ -510,7 +511,8 @@
 
                 if (dashboardResponse.status === 401 || dashboardResponse.status === 403) {
                     localStorage.removeItem('ta_admin_token');
-                    window.location.href = '/admin/login';
+                    localStorage.removeItem('ta_token');
+                    window.location.href = '/masuk';
                     return;
                 }
 
@@ -878,7 +880,8 @@
                     });
                 } catch (e) {}
                 localStorage.removeItem('ta_admin_token');
-                window.location.href = '/admin/login';
+                localStorage.removeItem('ta_token');
+                window.location.href = '/masuk';
             }
         }
 
