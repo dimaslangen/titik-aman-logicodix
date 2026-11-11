@@ -123,15 +123,17 @@
                     <div class="d-flex align-items-center gap-2 flex-grow-1 flex-wrap">
                         <div class="input-group input-group-sm" style="max-width: 300px;">
                             <span class="input-group-text bg-success-subtle text-success border-0"><i class="bi bi-geo-alt-fill"></i></span>
-                            <select class="form-select bg-light border-0 fw-semibold" id="pilihanAsal" onchange="ubahWilayahRute()">
-                                <option value="unesa">UNESA Lidah Wetan, Surabaya</option>
+                            <select class="form-select bg-light border-0 fw-semibold" id="pilihanAsal">
+                                <option value="unesa-lidah-wetan">UNESA Lidah Wetan, Surabaya</option>
+                                <option value="unesa-ketintang">UNESA Ketintang, Surabaya</option>
                                 <option value="rawamangun">Rawamangun, Jakarta Timur</option>
                             </select>
                         </div>
                         <i class="bi bi-arrow-right text-muted"></i>
                         <div class="input-group input-group-sm flex-grow-1" style="max-width: 320px;">
                             <span class="input-group-text bg-danger-subtle text-danger border-0"><i class="bi bi-flag-fill"></i></span>
-                            <input type="text" class="form-control bg-light border-0" id="inputTujuan" value="Gerbang Utama / Titik Tujuan Aman" readonly>
+                            <input type="number" step="any" class="form-control bg-light border-0" id="destinationLat" placeholder="Tujuan latitude">
+                            <input type="number" step="any" class="form-control bg-light border-0" id="destinationLng" placeholder="Tujuan longitude">
                         </div>
                     </div>
                     <div>
@@ -148,9 +150,32 @@
 
                 <!-- Panel Bawah: Pilihan Rute Perjalanan -->
                 <div class="bg-white p-4 rounded-4 shadow-sm">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3"><input type="number" step="any" class="form-control" id="originLat" placeholder="Asal latitude"></div>
+                        <div class="col-md-3"><input type="number" step="any" class="form-control" id="originLng" placeholder="Asal longitude"></div>
+                        <div class="col-md-3">
+                            <div class="btn-group w-100" role="group" aria-label="Moda transportasi">
+                                <button type="button" class="btn btn-outline-success mode-tab" data-mode="mobil">Mobil</button>
+                                <button type="button" class="btn btn-success mode-tab active" data-mode="motor">Motor</button>
+                                <button type="button" class="btn btn-outline-success mode-tab" data-mode="jalan_kaki">Jalan kaki</button>
+                            </div>
+                            <input type="hidden" id="routeMode" value="motor">
+                        </div>
+                        <div class="col-md-3"><button type="button" class="btn btn-success w-100" id="compareRoutesButton">Cari / Bandingkan</button></div>
+                    </div>
+                    <div id="routeStatus" class="alert d-none py-2"></div>
+                    <dialog id="shareDialog" class="rounded-4 border-0 shadow p-4">
+                        <h5 class="fw-bold">Bagikan Rute</h5>
+                        <p class="text-muted small">Tautan Live Companion berlaku selama 6 jam.</p>
+                        <input id="shareUrl" class="form-control mb-3" readonly>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary" id="closeShareDialog">Tutup</button>
+                            <button type="button" class="btn btn-success" id="copyShareUrl">Salin Tautan</button>
+                        </div>
+                    </dialog>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold text-dark mb-0">Pilih Rute Perjalanan (Dua Opsi Ditemukan)</h6>
-                        <small class="text-muted"><i class="bi bi-clock-history me-1"></i> Diperbarui 1m lalu</small>
+                        <button type="button" class="btn btn-outline-success btn-sm" id="shareRouteButton" disabled>Bagikan Rute</button>
                     </div>
 
                     <div class="row g-3">
@@ -159,11 +184,11 @@
                             <div class="p-3 rounded-4 route-option-card border-success bg-success-subtle bg-opacity-10">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <span class="badge bg-success text-white px-3 py-1 rounded-pill">SafePass (Rekomendasi)</span>
-                                    <span class="fw-bold text-success">12 Menit</span>
+                                    <span class="fw-bold text-success" id="safeDuration">-</span>
                                 </div>
-                                <h6 class="fw-bold text-dark mb-1">Jalur Utama Ber-CCTV & Terang</h6>
-                                <p class="text-muted small mb-3">Melalui Pos Satpam utama, minim titik gelap, sangat aman untuk malam hari.</p>
-                                <button type="button" class="btn btn-success btn-sm w-100 rounded-pill fw-semibold shadow-sm" onclick="pilihRute('SafePass (Rekomendasi)')">
+                                <h6 class="fw-bold text-dark mb-1">SafePass</h6>
+                                <p class="text-muted small mb-3" id="safeDetails">Belum ada hasil rute.</p>
+                                <button type="button" class="btn btn-success btn-sm w-100 rounded-pill fw-semibold shadow-sm" onclick="pilihRute('SafePass')">
                                     Gunakan Rute Ini <i class="bi bi-arrow-right ms-1"></i>
                                 </button>
                             </div>
@@ -174,11 +199,11 @@
                             <div class="p-3 rounded-4 route-option-card">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <span class="badge text-white px-3 py-1 rounded-pill" style="background-color: #0d9488;">Tercepat</span>
-                                    <span class="fw-bold text-dark">9 Menit</span>
+                                    <span class="fw-bold text-dark" id="fastDuration">-</span>
                                 </div>
-                                <h6 class="fw-bold text-dark mb-1">Jalur Pintar / Alternatif</h6>
-                                <p class="text-muted small mb-3">Lebih cepat sampai, namun terdapat beberapa titik lampu redup di pertigaan.</p>
-                                <button type="button" class="btn btn-outline-success btn-sm w-100 rounded-pill fw-semibold shadow-sm" onclick="pilihRute('Jalur Pintar / Alternatif')">
+                                <h6 class="fw-bold text-dark mb-1">Rute tercepat</h6>
+                                <p class="text-muted small mb-3" id="fastDetails">Belum ada hasil rute.</p>
+                                <button type="button" class="btn btn-outline-success btn-sm w-100 rounded-pill fw-semibold shadow-sm" onclick="pilihRute('Tercepat')">
                                     Gunakan Rute Ini <i class="bi bi-arrow-right ms-1"></i>
                                 </button>
                             </div>
@@ -194,77 +219,167 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Inisialisasi Peta Komparasi Rute
-        var mapRute = L.map('mapRute').setView([-7.2819, 112.7388], 15);
-
+        const routeApi = '/api/v1';
+        const mapRute = L.map('mapRute').setView([0, 0], 2);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(mapRute);
+        const routeLayer = L.layerGroup().addTo(mapRute);
+        let routeRegions = {};
+        let lastRouteRequest = null;
+        let lastRouteData = null;
 
-        // Variabel penampung layer marker & polyline agar bisa di-reset saat wilayah diganti
-        var markerAsal, markerTujuan, polylineAman, polylineTercepat;
+        const $route = id => document.getElementById(id);
+        const showRouteStatus = (message, type = 'danger') => {
+            const element = $route('routeStatus');
+            element.className = `alert alert-${type} py-2`;
+            element.textContent = message;
+        };
+        const formatDuration = seconds => `${Math.round(Number(seconds || 0) / 60)} menit`;
+        const formatDistance = meters => `${(Number(meters || 0) / 1000).toFixed(2)} km`;
+        const toLeafletCoordinates = route => (route?.geometry?.coordinates || [])
+            .filter(coordinate => Array.isArray(coordinate) && coordinate.length >= 2)
+            .map(coordinate => [coordinate[1], coordinate[0]]);
 
-        function updatePeta(latAsal, lonAsal, latTujuan, lonTujuan, jalurAmanCoords, jalurCepatCoords, namaTujuan) {
-            // Hapus layer lama jika sudah ada
-            if (markerAsal) mapRute.removeLayer(markerAsal);
-            if (markerTujuan) mapRute.removeLayer(markerTujuan);
-            if (polylineAman) mapRute.removeLayer(polylineAman);
-            if (polylineTercepat) mapRute.removeLayer(polylineTercepat);
-
-            // Set tampilan peta ke titik tengah asal
-            mapRute.setView([latAsal, lonAsal], 15);
-
-            // Buat Marker Baru
-            markerAsal = L.marker([latAsal, lonAsal]).addTo(mapRute)
-                .bindPopup('<b>Lokasi Asal</b>').openPopup();
-
-            markerTujuan = L.marker([latTujuan, lonTujuan]).addTo(mapRute)
-                .bindPopup('<b>' + namaTujuan + '</b>');
-
-            // Gambar Garis Rute (SafePass = Hijau, Tercepat = Oranye Putus-putus)
-            polylineAman = L.polyline(jalurAmanCoords, {color: '#10b981', weight: 5, opacity: 0.8}).addTo(mapRute);
-            polylineTercepat = L.polyline(jalurCepatCoords, {color: '#f59e0b', weight: 4, opacity: 0.7, dashArray: '5, 5'}).addTo(mapRute);
+        function setRegionDefaults() {
+            const region = routeRegions[$route('pilihanAsal').value];
+            if (!region) return;
+            const center = region.center;
+            $route('originLat').value = center.lat;
+            $route('originLng').value = center.lng;
+            $route('destinationLat').value = center.lat;
+            $route('destinationLng').value = center.lng;
+            mapRute.setView([center.lat, center.lng], 15);
         }
 
-        // Jalankan default pertama kali (UNESA Surabaya)
-        updatePeta(
-            -7.2819, 112.7388, 
-            -7.2750, 112.7420, 
-            [[-7.2819, 112.7388], [-7.2790, 112.7400], [-7.2750, 112.7420]],
-            [[-7.2819, 112.7388], [-7.2830, 112.7410], [-7.2750, 112.7420]],
-            "Gerbang Utama UNESA"
-        );
+        function drawRoute(data) {
+            routeLayer.clearLayers();
+            const safe = toLeafletCoordinates(data.safepass);
+            const fastest = toLeafletCoordinates(data.fastest);
+            const points = [...safe, ...fastest];
+            if (fastest.length) L.polyline(fastest, {color: '#eab308', weight: 5, dashArray: '10 8'}).bindPopup('Rute tercepat').addTo(routeLayer);
+            if (safe.length) L.polyline(safe, {color: '#16a34a', weight: 8}).bindPopup('SafePass').addTo(routeLayer);
+            if (points.length) mapRute.fitBounds(points, {padding: [28, 28], maxZoom: 17});
+            const origin = [Number(lastRouteRequest.origin_lat), Number(lastRouteRequest.origin_lng)];
+            const destination = [Number(lastRouteRequest.destination_lat), Number(lastRouteRequest.destination_lng)];
+            L.marker(origin).bindPopup('Lokasi asal').addTo(routeLayer);
+            L.marker(destination).bindPopup('Lokasi tujuan').addTo(routeLayer);
+        }
 
-        // Fungsi saat dropdown pilihan wilayah diganti
-        function ubahWilayahRute() {
-            var pilihan = document.getElementById('pilihanAsal').value;
-            var inputTujuan = document.getElementById('inputTujuan');
+        function routeSummary(route) {
+            const avoided = (route?.avoided_reports || []).length;
+            const hubs = (route?.hubs_passed || []).length;
+            return `${formatDistance(route?.distance)} · penalti ${route?.penalty_seconds || 0} dtk · ${avoided} laporan dihindari · ${hubs} safety hub`;
+        }
 
-            if (pilihan === 'unesa') {
-                inputTujuan.value = "Gerbang Utama / Titik Tujuan Aman";
-                updatePeta(
-                    -7.2819, 112.7388, 
-                    -7.2750, 112.7420, 
-                    [[-7.2819, 112.7388], [-7.2790, 112.7400], [-7.2750, 112.7420]],
-                    [[-7.2819, 112.7388], [-7.2830, 112.7410], [-7.2750, 112.7420]],
-                    "Gerbang Utama UNESA"
-                );
-            } else if (pilihan === 'rawamangun') {
-                inputTujuan.value = "Velodrome / Titik Aman Rawamangun";
-                updatePeta(
-                    -6.1944, 106.8823, 
-                    -6.1880, 106.8900, 
-                    [[-6.1944, 106.8823], [-6.1910, 106.8860], [-6.1880, 106.8900]],
-                    [[-6.1944, 106.8823], [-6.1960, 106.8880], [-6.1880, 106.8900]],
-                    "Velodrome Rawamangun"
-                );
+        async function compareRoutes() {
+            const button = $route('compareRoutesButton');
+            const body = {
+                origin_lat: Number($route('originLat').value),
+                origin_lng: Number($route('originLng').value),
+                destination_lat: Number($route('destinationLat').value),
+                destination_lng: Number($route('destinationLng').value),
+                mode: $route('routeMode').value,
+                region_slug: $route('pilihanAsal').value
+            };
+            if (Object.values(body).some(value => value === '' || Number.isNaN(value))) {
+                showRouteStatus('Lengkapi koordinat asal dan tujuan terlebih dahulu.');
+                return;
+            }
+            button.disabled = true;
+            button.textContent = 'Memuat...';
+            try {
+                const response = await fetch(`${routeApi}/routes/compare`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', Accept: 'application/json'},
+                    body: JSON.stringify(body)
+                });
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(payload.message || 'Rute tidak dapat dihitung. Periksa region dan koordinat.');
+                lastRouteRequest = body;
+                lastRouteData = payload.data;
+                drawRoute(payload.data);
+                $route('safeDuration').textContent = formatDuration(payload.data.safepass?.duration);
+                $route('fastDuration').textContent = formatDuration(payload.data.fastest?.duration);
+                $route('safeDetails').textContent = routeSummary(payload.data.safepass);
+                $route('fastDetails').textContent = `${formatDistance(payload.data.fastest?.distance)} · skor ${payload.data.fastest?.score_seconds || 0} detik`;
+                $route('shareRouteButton').disabled = false;
+                showRouteStatus(payload.data.note || 'Rute berhasil dimuat.', 'success');
+            } catch (error) {
+                showRouteStatus(error.message);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Cari / Bandingkan';
             }
         }
 
+        async function shareRoute() {
+            if (!lastRouteRequest || !lastRouteData) return;
+            const token = localStorage.getItem('ta_token');
+            if (!token) {
+                alert('Silakan masuk terlebih dahulu untuk membagikan rute.');
+                return;
+            }
+            try {
+                const response = await fetch(`${routeApi}/shared-routes`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', Accept: 'application/json', Authorization: `Bearer ${token}`},
+                    body: JSON.stringify({...lastRouteRequest, route_data: lastRouteData})
+                });
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(payload.message || 'Rute gagal dibagikan.');
+                const shareUrl = payload.data.share_url;
+                $route('shareUrl').value = shareUrl;
+                $route('shareDialog').showModal();
+            } catch (error) {
+                if (error.message.includes('Unauthenticated') || error.message.includes('401')) {
+                    alert('Sesi login berakhir. Silakan masuk kembali untuk membagikan rute.');
+                    return;
+                }
+                alert(error.message);
+            }
+        }
+
+        async function loadRouteRegions() {
+            const response = await fetch(`${routeApi}/regions`, {headers: {Accept: 'application/json'}});
+            if (!response.ok) throw new Error('Daftar region gagal dimuat.');
+            const payload = await response.json();
+            const regions = Array.isArray(payload.data) ? payload.data : [];
+            routeRegions = Object.fromEntries(regions.map(region => [region.slug, region]));
+            setRegionDefaults();
+        }
+
+        $route('pilihanAsal').addEventListener('change', setRegionDefaults);
+        document.querySelectorAll('.mode-tab').forEach(button => button.addEventListener('click', () => {
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.className = tab === button ? 'btn btn-success mode-tab active' : 'btn btn-outline-success mode-tab';
+            });
+            $route('routeMode').value = button.dataset.mode;
+        }));
+        $route('compareRoutesButton').addEventListener('click', compareRoutes);
+        $route('shareRouteButton').addEventListener('click', shareRoute);
+        $route('closeShareDialog').addEventListener('click', () => $route('shareDialog').close());
+        $route('copyShareUrl').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText($route('shareUrl').value);
+                $route('copyShareUrl').textContent = 'Tersalin';
+            } catch (error) {
+                alert(`Tautan tidak dapat disalin otomatis: ${error.message}`);
+            }
+        });
+        loadRouteRegions().catch(error => showRouteStatus(error.message));
+
+        function ubahWilayahRute() {
+            setRegionDefaults();
+        }
+
         function pilihRute(namaRute) {
-            alert("Rute dipilih: " + namaRute + ". Memulai navigasi aman...");
-            window.location.href = '/app';
+            if (!lastRouteData) {
+                showRouteStatus('Bandingkan rute terlebih dahulu.');
+                return;
+            }
+            alert(`Rute ${namaRute} dipilih.`);
         }
     </script>
 </body>

@@ -267,10 +267,9 @@ Akun yang diblokir tidak bisa login (`403`).
 
 ## 10. Kontrak Gemini — UNTUK RAFA (AI Engineer)
 
-**Status saat ini: STUB.** Tidak ada panggilan ke Google sama sekali.
-File: `app/Services/AiPhotoCheckService.php`
-(interface `AiPhotoCheckService` + `StubAiPhotoCheckService`),
-di-binding di `app/Providers/AppServiceProvider.php`.
+**Status saat ini: terintegrasi.** Implementasi panggilan Google Gemini berada di
+`app/Services/GeminiAiPhotoCheckService.php` dan di-binding di
+`app/Providers/AppServiceProvider.php`.
 
 **Yang harus Rafa lakukan (tanpa mengubah controller):**
 1. Isi `GEMINI_API_KEY` di `.env` (jangan commit key asli).
@@ -299,13 +298,10 @@ di-binding di `app/Providers/AppServiceProvider.php`.
 - AI **hanya penyaring awal**, tidak menentukan status verifikasi akhir — itu tetap
   dari upvote warga / admin.
 
-**Fallback (FR-02.7, sudah diimplementasikan di `ReportController`):**
-Kalau panggilan Gemini gagal/timeout, controller menyimpan laporan dengan status
-`PENDING_MODERATION` + `ai_check.source = "stub"` dan tetap mengembalikan `201`
-(tidak menggagalkan input user). Admin meninjau manual di dashboard.
-Di implementasi Rafa: lempar exception / kembalikan `['source' => 'gemini_error', ...]`
-kalau Gemini gagal, dan controller akan tetap menyimpannya sebagai
-`PENDING_MODERATION` — jangan ubah perilaku ini.
+**Fallback (FR-02.7):**
+Kalau panggilan Gemini gagal/timeout atau key kosong, service mengembalikan
+`source = "gemini_error"` dengan `is_valid = false`, sehingga hasil dapat ditinjau
+manual tanpa menggagalkan proses pemeriksaan foto.
 
 **Endpoint terkait:** `POST /api/v1/reports/{id}/ai-check` (auth) — memanggil
 service ini untuk laporan yang sudah ada, berguna untuk tes manual Rafa.
