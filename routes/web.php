@@ -1,6 +1,9 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', fn()=> redirect('/test'));
+Route::get('/admin/login', fn()=> view('admin-login'));
 
 Route::get('/masuk', fn() => view('auth'));
 Route::get('/daftar', fn() => view('auth'));
