@@ -60,6 +60,10 @@
             border-radius: 16px;
             overflow: hidden;
         }
+        .live-feed-list {
+            max-height: 340px;
+            overflow-y: auto;
+        }
         .live-feed-item {
             border-bottom: 1px solid #f1f5f9;
             padding-bottom: 12px;
@@ -99,32 +103,34 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link py-2 px-3 d-flex justify-content-between align-items-center">
+                            <a href="#moderasiSection" class="nav-link py-2 px-3 d-flex justify-content-between align-items-center">
                                 <span><i class="bi bi-exclamation-triangle me-2"></i> Moderasi</span>
-                                <span class="badge bg-danger rounded-pill" style="font-size: 10px;">8</span>
+                                <span class="badge bg-danger rounded-pill" style="font-size: 10px;" id="badgePendingModeration">0</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/app" class="nav-link py-2 px-3">
-                                <i class="bi bi-map me-2"></i> Patrol Grid
+                                <i class="bi bi-map me-2"></i> Peta Warga
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/rute-saya" class="nav-link py-2 px-3">
-                                <i class="bi bi-building me-2"></i> Safety Hub
+                                <i class="bi bi-signpost-split me-2"></i> Navigasi Rute
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/lapor-kondisi" class="nav-link py-2 px-3">
-                                <i class="bi bi-people me-2"></i> Komunitas
+                                <i class="bi bi-camera me-2"></i> Form Laporan
                             </a>
                         </li>
                     </ul>
 
-                    <!-- Card Bantuan / Support -->
+                    <!-- Card Bantuan / Status Grid -->
                     <div class="p-3 bg-light rounded-4 border-0 mb-3">
-                        <small class="fw-bold text-dark d-block">Butuh bantuan?</small>
-                        <small class="text-muted" style="font-size: 11px;">Pusat kendali 24/7</small>
+                        <small class="fw-bold text-dark d-block">Status API & Grid</small>
+                        <small class="text-success fw-semibold" style="font-size: 11px;">
+                            <span class="spinner-grow spinner-grow-sm text-success me-1" role="status" style="width: 8px; height: 8px;"></span> Live terhubung
+                        </small>
                     </div>
                 </div>
 
@@ -132,15 +138,17 @@
                 <div class="px-2 pt-3 border-top">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" style="width: 35px; height: 35px; font-size: 12px;">
-                                AP
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" style="width: 35px; height: 35px; font-size: 12px;" id="adminAvatar">
+                                AD
                             </div>
-                            <div style="font-size: 12px;">
-                                <span class="fw-semibold text-dark d-block mb-0">Admin Patroli</span>
-                                <small class="text-muted" style="font-size: 10px;">admin@titikaman.id</small>
+                            <div style="font-size: 12px; max-width: 110px; overflow: hidden;">
+                                <span class="fw-semibold text-dark d-block mb-0 text-truncate" id="adminName">Admin</span>
+                                <small class="text-muted d-block text-truncate" style="font-size: 10px;" id="adminEmail">admin@titikaman.id</small>
                             </div>
                         </div>
-                        <i class="bi bi-chevron-right text-muted small"></i>
+                        <button type="button" class="btn btn-outline-danger btn-sm p-1 rounded-circle" onclick="adminLogout()" title="Keluar">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -149,70 +157,73 @@
             <div class="col-md-9 col-lg-10 p-4">
                 
                 <!-- Sub-Header & Location Toggles -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                     <div>
                         <small class="text-uppercase text-muted fw-bold" style="font-size: 11px;">CIVIC SAFETY COMMAND CENTER</small>
-                        <h3 class="fw-bold text-dark mb-0">Selamat malam, Admin</h3>
+                        <h3 class="fw-bold text-dark mb-0">Selamat datang, <span id="adminGreeting">Admin</span></h3>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <div class="bg-white p-1 rounded-pill shadow-sm border d-flex gap-1">
-                            <button id="btnAdminUnesa" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold" onclick="switchAdminLoc('unesa')">UNESA</button>
-                            <button id="btnAdminRawamangun" class="btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold" onclick="switchAdminLoc('rawamangun')">Rawamangun</button>
+                        <div class="bg-white p-1 rounded-pill shadow-sm border d-flex gap-1" id="regionBtnGroup">
+                            <button class="btn btn-sm btn-success rounded-pill px-3 fw-semibold region-toggle" data-region="unesa-lidah-wetan">UNESA Lidah Wetan</button>
+                            <button class="btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold region-toggle" data-region="unesa-ketintang">UNESA Ketintang</button>
+                            <button class="btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold region-toggle" data-region="rawamangun">Rawamangun</button>
                         </div>
-                        <button class="btn btn-outline-danger btn-sm rounded-circle p-2" title="Peringatan Darurat">
-                            <i class="bi bi-exclamation-octagon-fill"></i>
-                        </button>
+                        <div id="sosAlertBadge" class="d-none">
+                            <span class="badge bg-danger rounded-pill px-3 py-2 animate-pulse">
+                                <i class="bi bi-exclamation-octagon-fill me-1"></i> SOS AKTIF
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 4 KARTU METRIK UTAMA -->
+                <!-- 4 KARTU METRIK UTAMA (DINAMIS DARI GET /api/v1/admin/dashboard) -->
                 <div class="row g-3 mb-4">
                     <div class="col-6 col-lg-3">
                         <div class="metric-card p-3 shadow-sm">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted small fw-semibold">Laporan Aktif</span>
+                                <span class="text-muted small fw-semibold">Laporan Wilayah</span>
                                 <div class="icon-box bg-warning-subtle text-warning">
                                     <i class="bi bi-file-earmark-text-fill"></i>
                                 </div>
                             </div>
-                            <h2 class="fw-bold text-dark mb-0">24</h2>
-                            <small class="text-success fw-semibold" style="font-size: 11px;">+6 hari ini</small>
+                            <h2 class="fw-bold text-dark mb-0" id="statTotalReports">-</h2>
+                            <small class="text-muted fw-semibold" style="font-size: 11px;" id="statTotalReportsSub">Memuat...</small>
                         </div>
                     </div>
                     <div class="col-6 col-lg-3">
                         <div class="metric-card p-3 shadow-sm">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted small fw-semibold">Verified</span>
+                                <span class="text-muted small fw-semibold">Terverifikasi</span>
                                 <div class="icon-box bg-success-subtle text-success">
                                     <i class="bi bi-check-circle-fill"></i>
                                 </div>
                             </div>
-                            <h2 class="fw-bold text-dark mb-0">87%</h2>
-                            <small class="text-success fw-semibold" style="font-size: 11px;">+12% minggu ini</small>
+                            <h2 class="fw-bold text-dark mb-0" id="statVerified">-</h2>
+                            <small class="text-success fw-semibold" style="font-size: 11px;" id="statVerifiedSub">-</small>
                         </div>
                     </div>
                     <div class="col-6 col-lg-3">
                         <div class="metric-card p-3 shadow-sm">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted small fw-semibold">Waktu Respons</span>
-                                <div class="icon-box bg-info-subtle text-info">
-                                    <i class="bi bi-clock-fill"></i>
+                                <span class="text-muted small fw-semibold">Perlu Moderasi</span>
+                                <div class="icon-box bg-danger-subtle text-danger">
+                                    <i class="bi bi-shield-exclamation"></i>
                                 </div>
                             </div>
-                            <h2 class="fw-bold text-dark mb-0">18m</h2>
-                            <small class="text-success fw-semibold" style="font-size: 11px;">4m lebih cepat</small>
+                            <h2 class="fw-bold text-dark mb-0" id="statPending">-</h2>
+                            <small class="text-secondary fw-semibold" style="font-size: 11px;" id="statPendingSub">-</small>
                         </div>
                     </div>
                     <div class="col-6 col-lg-3">
                         <div class="metric-card p-3 shadow-sm">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted small fw-semibold">Safety Hub Aktif</span>
-                                <div class="icon-box bg-primary-subtle text-primary">
-                                    <i class="bi bi-shield-fill-check"></i>
+                                <span class="text-muted small fw-semibold">Alert SOS Terbuka</span>
+                                <div class="icon-box bg-danger-subtle text-danger">
+                                    <i class="bi bi-telephone-fill"></i>
                                 </div>
                             </div>
-                            <h2 class="fw-bold text-dark mb-0">12</h2>
-                            <small class="text-muted fw-semibold" style="font-size: 11px;">Semua online</small>
+                            <h2 class="fw-bold text-dark mb-0" id="statSosOpen">-</h2>
+                            <small class="text-danger fw-semibold" style="font-size: 11px;" id="statSosOpenSub">-</small>
                         </div>
                     </div>
                 </div>
@@ -223,80 +234,41 @@
                         <div class="bg-white p-3 rounded-4 border shadow-sm h-100">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
-                                    <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">INTENSITAS LAPORAN</small>
-                                    <h6 class="fw-bold text-dark mb-0">Patrol Heatmap • <span id="judulLokasiMap">UNESA</span></h6>
+                                    <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">INTENSITAS LAPORAN LAPANGAN</small>
+                                    <h6 class="fw-bold text-dark mb-0">Patrol Heatmap • <span id="judulLokasiMap">UNESA Lidah Wetan</span></h6>
                                 </div>
-                                <div>
-                                    <select class="form-select form-select-sm bg-light border-0 fw-semibold rounded-pill px-3">
-                                        <option value="6">6 jam terakhir</option>
-                                        <option value="12">12 jam terakhir</option>
-                                        <option value="24">24 jam terakhir</option>
-                                    </select>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-light text-secondary border" id="heatmapCellCount">0 grid aktif</span>
                                 </div>
                             </div>
                             <div class="map-heatmap-container">
                                 <div id="adminMap" style="width: 100%; height: 100%;"></div>
                             </div>
+                            <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top">
+                                <div class="d-flex align-items-center gap-3 small text-muted">
+                                    <span><i class="bi bi-circle-fill text-danger me-1"></i> Densitas Tinggi (≥3)</span>
+                                    <span><i class="bi bi-circle-fill text-warning me-1"></i> Densitas Sedang (1-2)</span>
+                                    <span><i class="bi bi-circle-fill text-primary me-1"></i> Safety Hub</span>
+                                </div>
+                                <small class="text-muted" id="lastUpdatedHeatmap">Diperbarui baru saja</small>
+                            </div>
                         </div>
                     </div>
 
                     <div class="col-lg-4">
-                        <div class="bg-white p-3 rounded-4 border shadow-sm h-100">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div>
-                                    <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">LIVE FEED</small>
-                                    <h6 class="fw-bold text-dark mb-0">Aktivitas Terbaru</h6>
+                        <div class="bg-white p-3 rounded-4 border shadow-sm h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">LIVE FEED</small>
+                                        <h6 class="fw-bold text-dark mb-0">Aktivitas Terbaru</h6>
+                                    </div>
+                                    <span class="spinner-grow spinner-grow-sm text-success" role="status"></span>
                                 </div>
-                                <span class="spinner-grow spinner-grow-sm text-success" role="status"></span>
-                            </div>
 
-                            <div class="live-feed-list pt-2">
-                                <div class="live-feed-item d-flex align-items-start gap-3">
-                                    <div class="bg-warning-subtle text-warning p-2 rounded-circle mt-1">
-                                        <i class="bi bi-exclamation-diamond-fill"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h6 class="fw-bold text-dark small mb-0">Laporan baru diterima</h6>
-                                            <span class="badge bg-success-subtle text-success rounded-circle p-1" style="width: 8px; height: 8px;"></span>
-                                        </div>
-                                        <small class="text-muted d-block" style="font-size: 11px;">Lidah Wetan • 2 menit lalu</small>
-                                    </div>
-                                </div>
-                                <div class="live-feed-item d-flex align-items-start gap-3">
-                                    <div class="bg-success-subtle text-success p-2 rounded-circle mt-1">
-                                        <i class="bi bi-check-circle-fill"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h6 class="fw-bold text-dark small mb-0">Laporan terverifikasi</h6>
-                                            <span class="badge bg-success-subtle text-success rounded-circle p-1" style="width: 8px; height: 8px;"></span>
-                                        </div>
-                                        <small class="text-muted d-block" style="font-size: 11px;">Rawamangun • 8 menit lalu</small>
-                                    </div>
-                                </div>
-                                <div class="live-feed-item d-flex align-items-start gap-3">
-                                    <div class="bg-info-subtle text-info p-2 rounded-circle mt-1">
-                                        <i class="bi bi-shield-shaded"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h6 class="fw-bold text-dark small mb-0">Petugas merespons</h6>
-                                            <span class="badge bg-success-subtle text-success rounded-circle p-1" style="width: 8px; height: 8px;"></span>
-                                        </div>
-                                        <small class="text-muted d-block" style="font-size: 11px;">Ketintang • 14 menit lalu</small>
-                                    </div>
-                                </div>
-                                <div class="live-feed-item d-flex align-items-start gap-3">
-                                    <div class="bg-primary-subtle text-primary p-2 rounded-circle mt-1">
-                                        <i class="bi bi-clock-history"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h6 class="fw-bold text-dark small mb-0">Hambatan diselesaikan</h6>
-                                            <span class="badge bg-success-subtle text-success rounded-circle p-1" style="width: 8px; height: 8px;"></span>
-                                        </div>
-                                        <small class="text-muted d-block" style="font-size: 11px;">Jl. Pemuda • 22 menit lalu</small>
+                                <div class="live-feed-list pt-2" id="liveFeedContainer">
+                                    <div class="text-center py-4 text-muted small">
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span> Memuat aktivitas...
                                     </div>
                                 </div>
                             </div>
@@ -304,23 +276,17 @@
                     </div>
                 </div>
 
-                <!-- SECTION BARU: ANTRIAN PEMERIKSAAN - MODERASI LAPORAN -->
-                <div class="bg-white p-4 rounded-4 border shadow-sm">
+                <!-- SECTION: ANTRIAN PEMERIKSAAN - MODERASI LAPORAN (Tahap 3 Preview) -->
+                <div class="bg-white p-4 rounded-4 border shadow-sm" id="moderasiSection">
                     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                         <div>
-                            <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">ANTRIAN PEMERIKSAAN</small>
-                            <h5 class="fw-bold text-dark mb-0">Moderasi laporan</h5>
+                            <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">ANTRIAN PEMERIKSAAN LAPORAN</small>
+                            <h5 class="fw-bold text-dark mb-0">Laporan Terbaru Wilayah</h5>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <div class="input-group input-group-sm" style="width: 200px;">
-                                <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
-                                <input type="text" class="form-control bg-light border-0" placeholder="Cari laporan">
-                            </div>
-                            <select class="form-select form-select-sm bg-light border-0 fw-semibold" style="width: 140px;">
-                                <option value="all">Semua status</option>
-                                <option value="verified">Verified</option>
-                                <option value="review">Review</option>
-                            </select>
+                            <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
+                                <i class="bi bi-info-circle me-1"></i> Aksi moderasi lengkap di Tahap 3
+                            </span>
                         </div>
                     </div>
 
@@ -328,89 +294,18 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="text-muted border-bottom" style="font-size: 12px; background-color: #fafbfc;">
                                 <tr>
-                                    <th class="py-3">LAPORAN</th>
-                                    <th class="py-3">LOKASI</th>
+                                    <th class="py-3">ID LAPORAN</th>
+                                    <th class="py-3">WILAYAH</th>
                                     <th class="py-3">KATEGORI</th>
-                                    <th class="py-3">VALIDASI</th>
+                                    <th class="py-3">VALIDASI KOMUNITAS</th>
                                     <th class="py-3">STATUS</th>
-                                    <th class="py-3 text-end">AKSI CEPAT</th>
+                                    <th class="py-3 text-end">WAKTU</th>
                                 </tr>
                             </thead>
-                            <tbody style="font-size: 14px;">
-                                <!-- Baris 1 -->
+                            <tbody style="font-size: 14px;" id="reportsTableBody">
                                 <tr>
-                                    <td class="py-3">
-                                        <span class="fw-bold text-dark">TA-1842</span><br>
-                                        <small class="text-muted" style="font-size: 11px;">12m lalu</small>
-                                    </td>
-                                    <td>Lidah Wetan</td>
-                                    <td>Penerangan Padam</td>
-                                    <td><span class="badge bg-success-subtle text-success px-2 py-1 rounded">3/3</span></td>
-                                    <td><span class="badge bg-success text-white px-3 py-1 rounded-pill" style="font-size: 11px;">VERIFIED</span></td>
-                                    <td class="text-end">
-                                        <div class="d-flex justify-content-end gap-1">
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Setujui"><i class="bi bi-check-lg text-success"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Periksa"><i class="bi bi-shield-check text-muted"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Komentar"><i class="bi bi-chat text-muted"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Peringatan"><i class="bi bi-exclamation-triangle text-muted"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Baris 2 -->
-                                <tr>
-                                    <td class="py-3">
-                                        <span class="fw-bold text-dark">TA-1839</span><br>
-                                        <small class="text-muted" style="font-size: 11px;">34m lalu</small>
-                                    </td>
-                                    <td>Jl. Pemuda</td>
-                                    <td>Hambatan Fisik Jalan</td>
-                                    <td><span class="badge bg-warning-subtle text-warning px-2 py-1 rounded">2/3</span></td>
-                                    <td><span class="badge bg-warning text-dark px-3 py-1 rounded-pill" style="font-size: 11px;">REVIEW</span></td>
-                                    <td class="text-end">
-                                        <div class="d-flex justify-content-end gap-1">
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Setujui"><i class="bi bi-check-lg text-success"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Periksa"><i class="bi bi-shield-check text-muted"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Komentar"><i class="bi bi-chat text-muted"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Peringatan"><i class="bi bi-exclamation-triangle text-muted"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Baris 3 -->
-                                <tr>
-                                    <td class="py-3">
-                                        <span class="fw-bold text-dark">TA-1833</span><br>
-                                        <small class="text-muted" style="font-size: 11px;">1j lalu</small>
-                                    </td>
-                                    <td>Rawamangun Muka</td>
-                                    <td>Area Sepi Perlu Perhatian</td>
-                                    <td><span class="badge bg-success-subtle text-success px-2 py-1 rounded">3/3</span></td>
-                                    <td><span class="badge bg-success text-white px-3 py-1 rounded-pill" style="font-size: 11px;">VERIFIED</span></td>
-                                    <td class="text-end">
-                                        <div class="d-flex justify-content-end gap-1">
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Setujui"><i class="bi bi-check-lg text-success"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Periksa"><i class="bi bi-shield-check text-muted"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Komentar"><i class="bi bi-chat text-muted"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Peringatan"><i class="bi bi-exclamation-triangle text-muted"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Baris 4 -->
-                                <tr>
-                                    <td class="py-3">
-                                        <span class="fw-bold text-dark">TA-1828</span><br>
-                                        <small class="text-muted" style="font-size: 11px;">2j lalu</small>
-                                    </td>
-                                    <td>Ketintang</td>
-                                    <td>Penerangan Padam</td>
-                                    <td><span class="badge bg-danger-subtle text-danger px-2 py-1 rounded">1/3</span></td>
-                                    <td><span class="badge bg-warning text-dark px-3 py-1 rounded-pill" style="font-size: 11px;">REVIEW</span></td>
-                                    <td class="text-end">
-                                        <div class="d-flex justify-content-end gap-1">
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Setujui"><i class="bi bi-check-lg text-success"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Periksa"><i class="bi bi-shield-check text-muted"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Komentar"><i class="bi bi-chat text-muted"></i></button>
-                                            <button class="btn btn-light btn-sm rounded-circle p-2" title="Peringatan"><i class="bi bi-exclamation-triangle text-muted"></i></button>
-                                        </div>
+                                    <td colspan="6" class="text-center py-4 text-muted small">
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span> Memuat daftar laporan...
                                     </td>
                                 </tr>
                             </tbody>
@@ -423,49 +318,320 @@
         </div>
     </div>
 
-    <!-- Leaflet JS -->
+    <!-- Bootstrap 5 JS Bundle & Leaflet JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        var adminMap = L.map('adminMap').setView([-7.2819, 112.7388], 14);
+        const adminApi = '/api/v1';
+        const adminToken = localStorage.getItem('ta_admin_token');
+
+        // Guard autentikasi admin: jika tidak ada token, arahkan ke login admin
+        if (!adminToken) {
+            window.location.href = '/admin/login';
+        }
+
+        const regionConfigs = {
+            'unesa-lidah-wetan': { name: 'UNESA Lidah Wetan', center: [-7.30071, 112.67289], zoom: 15 },
+            'unesa-ketintang': { name: 'UNESA Ketintang', center: [-7.31143, 112.72937], zoom: 15 },
+            'rawamangun': { name: 'Rawamangun', center: [-6.1928, 106.89763], zoom: 15 }
+        };
+
+        let activeRegion = 'unesa-lidah-wetan';
+        const adminMap = L.map('adminMap').setView(regionConfigs[activeRegion].center, regionConfigs[activeRegion].zoom);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(adminMap);
 
-        var adminMarker = L.marker([-7.2819, 112.7388]).addTo(adminMap)
-            .bindPopup('<b>Safety Hub UNESA</b><br>Area aktif terverifikasi.').openPopup();
+        const heatmapLayer = L.layerGroup().addTo(adminMap);
+        const hubsLayer = L.layerGroup().addTo(adminMap);
 
-        var heatCircle = L.circle([-7.2819, 112.7388], {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.35,
-            radius: 400
-        }).addTo(adminMap);
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+            }[char]));
+        }
 
-        function switchAdminLoc(loc) {
-            const btnU = document.getElementById('btnAdminUnesa');
-            const btnR = document.getElementById('btnAdminRawamangun');
-            const judul = document.getElementById('judulLokasiMap');
+        function formatTimeAgo(isoString) {
+            if (!isoString) return '-';
+            const diffSeconds = Math.floor((new Date() - new Date(isoString)) / 1000);
+            if (diffSeconds < 60) return `${diffSeconds} dtk lalu`;
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            if (diffMinutes < 60) return `${diffMinutes} mnt lalu`;
+            const diffHours = Math.floor(diffMinutes / 60);
+            if (diffHours < 24) return `${diffHours} jam lalu`;
+            return `${Math.floor(diffHours / 24)} hari lalu`;
+        }
 
-            if(loc === 'rawamangun') {
-                btnR.className = "btn btn-sm btn-success rounded-pill px-3 fw-semibold";
-                btnU.className = "btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold";
-                judul.innerText = "Rawamangun";
+        async function loadAdminProfile() {
+            try {
+                const response = await fetch(`${adminApi}/me`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
 
-                adminMap.setView([-6.1913, 106.8856], 14);
-                adminMarker.setLatLng([-6.1913, 106.8856]).bindPopup('<b>Safety Hub Rawamangun</b><br>Area aktif terverifikasi.').openPopup();
-                heatCircle.setLatLng([-6.1913, 106.8856]);
-            } else {
-                btnU.className = "btn btn-sm btn-success rounded-pill px-3 fw-semibold";
-                btnR.className = "btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold";
-                judul.innerText = "UNESA";
+                if (response.status === 401 || response.status === 403) {
+                    localStorage.removeItem('ta_admin_token');
+                    window.location.href = '/admin/login';
+                    return;
+                }
 
-                adminMap.setView([-7.2819, 112.7388], 14);
-                adminMarker.setLatLng([-7.2819, 112.7388]).bindPopup('<b>Safety Hub UNESA</b><br>Area aktif terverifikasi.').openPopup();
-                heatCircle.setLatLng([-7.2819, 112.7388]);
+                if (response.ok) {
+                    const json = await response.json();
+                    const admin = json.data;
+                    document.getElementById('adminName').textContent = admin.name || 'Admin';
+                    document.getElementById('adminGreeting').textContent = admin.name || 'Admin';
+                    document.getElementById('adminEmail').textContent = admin.email || 'admin@titikaman.id';
+                    
+                    const initials = (admin.name || 'AD').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+                    document.getElementById('adminAvatar').textContent = initials;
+                }
+            } catch (err) {
+                console.warn('Gagal memuat profil admin:', err);
             }
         }
+
+        async function loadAdminDashboard(regionSlug) {
+            activeRegion = regionSlug;
+            const regionInfo = regionConfigs[regionSlug] || { name: regionSlug, center: [-7.30071, 112.67289], zoom: 14 };
+            document.getElementById('judulLokasiMap').textContent = regionInfo.name;
+            adminMap.setView(regionInfo.center, regionInfo.zoom);
+
+            try {
+                const [dashboardResponse, hubsResponse] = await Promise.all([
+                    fetch(`${adminApi}/admin/dashboard?region_slug=${encodeURIComponent(regionSlug)}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${adminToken}`
+                        }
+                    }),
+                    fetch(`${adminApi}/safety-hubs?region_slug=${encodeURIComponent(regionSlug)}`, {
+                        headers: { 'Accept': 'application/json' }
+                    })
+                ]);
+
+                if (dashboardResponse.status === 401 || dashboardResponse.status === 403) {
+                    localStorage.removeItem('ta_admin_token');
+                    window.location.href = '/admin/login';
+                    return;
+                }
+
+                if (!dashboardResponse.ok) {
+                    throw new Error('Gagal mengambil data dashboard admin.');
+                }
+
+                const dashboardPayload = await dashboardResponse.json();
+                const data = dashboardPayload.data || {};
+                const totals = data.totals || {};
+
+                // 1. Perbarui 4 Kartu Metrik
+                const totalReports = Number(totals.reports || 0);
+                const verifiedReports = Number(totals.verified || 0);
+                const pendingModeration = Number(totals.pending_moderation || 0);
+                const unverifiedReports = Number(totals.unverified || 0);
+                const sosOpen = Number(totals.sos_open || 0);
+
+                document.getElementById('statTotalReports').textContent = totalReports;
+                document.getElementById('statTotalReportsSub').textContent = `${unverifiedReports} belum verifikasi`;
+
+                document.getElementById('statVerified').textContent = verifiedReports;
+                const verifiedPct = totalReports > 0 ? Math.round((verifiedReports / totalReports) * 100) : 0;
+                document.getElementById('statVerifiedSub').textContent = `${verifiedPct}% dari total laporan`;
+
+                document.getElementById('statPending').textContent = pendingModeration;
+                document.getElementById('statPendingSub').textContent = pendingModeration > 0 ? 'Perlu tindakan moderator' : 'Semua tertinjau';
+                document.getElementById('badgePendingModeration').textContent = pendingModeration;
+
+                document.getElementById('statSosOpen').textContent = sosOpen;
+                document.getElementById('statSosOpenSub').textContent = sosOpen > 0 ? 'Darurat aktif!' : 'Tidak ada sinyal aktif';
+
+                const sosBadge = document.getElementById('sosAlertBadge');
+                if (sosOpen > 0) {
+                    sosBadge.classList.remove('d-none');
+                } else {
+                    sosBadge.classList.add('d-none');
+                }
+
+                // 2. Render Patrol Heatmap Kerapatan Laporan (FR-04.2)
+                heatmapLayer.clearLayers();
+                const heatmapCells = Array.isArray(data.heatmap) ? data.heatmap : [];
+                document.getElementById('heatmapCellCount').textContent = `${heatmapCells.length} grid intensitas`;
+
+                heatmapCells.forEach(cellItem => {
+                    const coords = String(cellItem.cell || '').split(',').map(Number);
+                    if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+                        const count = Number(cellItem.count || 1);
+                        const verified = Number(cellItem.verified || 0);
+                        const radius = Math.min(350, 100 + count * 60);
+                        const color = count >= 3 ? '#ef4444' : (count === 2 ? '#f97316' : '#f59e0b');
+
+                        L.circle(coords, {
+                            radius: radius,
+                            color: color,
+                            fillColor: color,
+                            fillOpacity: 0.35,
+                            weight: 2
+                        }).bindPopup(`
+                            <div class="p-1">
+                                <strong>Patrol Grid: ${escapeHtml(cellItem.cell)}</strong><br>
+                                <span class="badge bg-dark mt-1 mb-1">${count} Laporan di grid ini</span><br>
+                                <small class="text-success"><i class="bi bi-check-circle me-1"></i>${verified} Terverifikasi</small>
+                            </div>
+                        `).addTo(heatmapLayer);
+                    }
+                });
+
+                // 3. Render Safety Hubs pada Peta Admin
+                hubsLayer.clearLayers();
+                if (hubsResponse.ok) {
+                    const hubsPayload = await hubsResponse.json();
+                    const hubs = Array.isArray(hubsPayload.data) ? hubsPayload.data : [];
+                    hubs.forEach(hub => {
+                        L.circleMarker([Number(hub.lat), Number(hub.lng)], {
+                            radius: 7,
+                            color: '#ffffff',
+                            weight: 2,
+                            fillColor: '#2563eb',
+                            fillOpacity: 0.95
+                        }).bindPopup(`<strong>${escapeHtml(hub.name)}</strong><br>Safety Hub · ${escapeHtml(hub.type)}`).addTo(hubsLayer);
+                    });
+                }
+
+                // 4. Render Live Feed (recent_reports & sos_alerts)
+                renderLiveFeed(data.recent_reports || [], data.sos_alerts || []);
+
+                // 5. Render Tabel Laporan Terbaru
+                renderReportsTable(data.recent_reports || []);
+
+                document.getElementById('lastUpdatedHeatmap').textContent = `Diperbarui ${new Date().toLocaleTimeString('id-ID')}`;
+
+            } catch (err) {
+                console.error('Error saat memuat dashboard admin:', err);
+                alert(`Gagal memuat data dashboard: ${err.message}`);
+            }
+        }
+
+        function renderLiveFeed(recentReports, sosAlerts) {
+            const container = document.getElementById('liveFeedContainer');
+            if (!container) return;
+
+            let html = '';
+
+            // Tampilkan SOS Alerts jika ada
+            sosAlerts.slice(0, 3).forEach(sos => {
+                const isOpen = sos.status === 'open';
+                html += `
+                    <div class="live-feed-item d-flex align-items-start gap-3">
+                        <div class="bg-danger-subtle text-danger p-2 rounded-circle mt-1">
+                            <i class="bi bi-exclamation-octagon-fill"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold text-danger small mb-0">Alert SOS Darurat</h6>
+                                <span class="badge ${isOpen ? 'bg-danger' : 'bg-secondary'} rounded-pill" style="font-size: 9px;">${escapeHtml(sos.status)}</span>
+                            </div>
+                            <small class="text-dark d-block fw-semibold" style="font-size: 11px;">${escapeHtml(sos.message || 'Panggilan SOS')}</small>
+                            <small class="text-muted d-block" style="font-size: 10px;">${escapeHtml(sos.region_slug || '-')} • ${formatTimeAgo(sos.created_at)}</small>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Tampilkan Recent Reports
+            if (recentReports.length === 0 && sosAlerts.length === 0) {
+                container.innerHTML = '<div class="text-center py-4 text-muted small">Belum ada aktivitas laporan baru.</div>';
+                return;
+            }
+
+            recentReports.slice(0, 6).forEach(rep => {
+                const iconClass = rep.category === 'penerangan_padam' ? 'bi-lightbulb-fill text-warning' : (rep.category === 'area_sepi' ? 'bi-eye-fill text-danger' : 'bi-cone-striped text-warning');
+                const bgClass = rep.category === 'area_sepi' ? 'bg-danger-subtle' : 'bg-warning-subtle';
+                
+                html += `
+                    <div class="live-feed-item d-flex align-items-start gap-3">
+                        <div class="${bgClass} p-2 rounded-circle mt-1">
+                            <i class="bi ${iconClass}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold text-dark small mb-0">${escapeHtml(rep.label || rep.category)}</h6>
+                                <span class="badge ${rep.status === 'VERIFIED' ? 'bg-success' : (rep.status === 'PENDING_MODERATION' ? 'bg-warning text-dark' : 'bg-secondary')} rounded-pill" style="font-size: 9px;">${escapeHtml(rep.status)}</span>
+                            </div>
+                            <small class="text-muted d-block" style="font-size: 11px;">${escapeHtml(rep.region_slug)} • ${formatTimeAgo(rep.created_at)}</small>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderReportsTable(reports) {
+            const tbody = document.getElementById('reportsTableBody');
+            if (!tbody) return;
+
+            if (reports.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted small">Tidak ada laporan pada wilayah ini.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            reports.forEach(rep => {
+                const badgeClass = rep.status === 'VERIFIED' ? 'bg-success' : (rep.status === 'PENDING_MODERATION' ? 'bg-warning text-dark' : 'bg-secondary');
+                html += `
+                    <tr>
+                        <td class="py-3">
+                            <span class="fw-bold text-dark">#${rep.id}</span>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">${escapeHtml(rep.region_slug)}</span></td>
+                        <td>${escapeHtml(rep.label || rep.category)}</td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success px-2 py-1 rounded">
+                                <i class="bi bi-hand-thumbs-up me-1"></i>${rep.upvotes_count || 0} Up-Check
+                            </span>
+                        </td>
+                        <td><span class="badge ${badgeClass} px-3 py-1 rounded-pill" style="font-size: 11px;">${escapeHtml(rep.status)}</span></td>
+                        <td class="text-end text-muted small">${formatTimeAgo(rep.created_at)}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        async function adminLogout() {
+            if (confirm('Apakah Anda yakin ingin keluar dari Command Center Admin?')) {
+                try {
+                    await fetch(`${adminApi}/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${adminToken}`
+                        }
+                    });
+                } catch (e) {}
+                localStorage.removeItem('ta_admin_token');
+                window.location.href = '/admin/login';
+            }
+        }
+
+        // Event listener pilihan wilayah
+        document.querySelectorAll('.region-toggle').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.region-toggle').forEach(b => {
+                    b.className = 'btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold region-toggle';
+                });
+                this.className = 'btn btn-sm btn-success rounded-pill px-3 fw-semibold region-toggle';
+                loadAdminDashboard(this.dataset.region);
+            });
+        });
+
+        // Inisialisasi awal
+        loadAdminProfile();
+        loadAdminDashboard(activeRegion);
     </script>
 </body>
 </html>
