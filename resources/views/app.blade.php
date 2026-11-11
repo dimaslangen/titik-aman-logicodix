@@ -123,8 +123,9 @@
                <!-- Filter / Quick Bar di atas Peta -->
 <div class="bg-white p-3 rounded-4 shadow-sm mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
     <div class="d-flex gap-2">
-        <button id="btn-unesa" class="btn btn-sm btn-outline-success active">UNESA</button>
-        <button id="btn-rawamangun" class="btn btn-sm btn-outline-secondary">Rawamangun</button>
+        <button id="btn-unesa" data-region="unesa-lidah-wetan" class="btn btn-sm btn-outline-success active">UNESA Lidah Wetan</button>
+        <button id="btn-ketintang" data-region="unesa-ketintang" class="btn btn-sm btn-outline-secondary">UNESA Ketintang</button>
+        <button id="btn-rawamangun" data-region="rawamangun" class="btn btn-sm btn-outline-secondary">Rawamangun</button>
     </div>
     <div class="d-flex align-items-center gap-2">
         <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
@@ -157,49 +158,85 @@
    <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Koordinat lokasi
-    var unesaLatLon = [-7.2819, 112.7388]; // UNESA Surabaya
-    var rawamangunLatLon = [-6.1913, 106.8856]; // Rawamangun Jakarta
-
-    // Inisialisasi Peta (Default ke UNESA)
-    var map = L.map('map').setView(unesaLatLon, 15);
+    const appApi = '/api/v1';
+    let appRegions = {};
+    let activeRegion = 'unesa-lidah-wetan';
+    let mapLayers = L.layerGroup();
+    const map = L.map('map').setView([0, 0], 2);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    var currentMarker = L.marker(unesaLatLon).addTo(map)
-        .bindPopup('<b>Area UNESA Surabaya</b><br>Titik Aman / Safety Hub terdekat.')
-        .openPopup();
+    mapLayers.addTo(map);
 
-    // Ambil elemen tombol berdasarkan ID
-    const btnUnesa = document.getElementById('btn-unesa');
-    const btnRawamangun = document.getElementById('btn-rawamangun');
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        }[char]));
+    }
 
-    // Event ketika tombol UNESA diklik
-    btnUnesa.addEventListener('click', function() {
-        map.setView(unesaLatLon, 15);
-        map.removeLayer(currentMarker);
-        currentMarker = L.marker(unesaLatLon).addTo(map)
-            .bindPopup('<b>Area UNESA Surabaya</b><br>Titik Aman / Safety Hub terdekat.')
-            .openPopup();
+    function regionCenter(region) {
+        const center = region?.center || [region?.center_lat, region?.center_lng];
+        return Array.isArray(center) ? center : [Number(center?.lat), Number(center?.lng)];
+    }
 
-        btnUnesa.className = "btn btn-sm btn-outline-success active";
-        btnRawamangun.className = "btn btn-sm btn-outline-secondary";
-    });
+    function reportColor(category) {
+        return category === 'hambatan_fisik' ? '#f59e0b' : '#dc2626';
+    }
 
-    // Event ketika tombol Rawamangun diklik
-    btnRawamangun.addEventListener('click', function() {
-        map.setView(rawamangunLatLon, 15);
-        map.removeLayer(currentMarker);
-        currentMarker = L.marker(rawamangunLatLon).addTo(map)
-            .bindPopup('<b>Area Rawamangun Jakarta</b><br>Titik Aman / Safety Hub terdekat.')
-            .openPopup();
+    async function loadAppRegions() {
+        const response = await fetch(`${appApi}/regions`, {headers: {Accept: 'application/json'}});
+        if (!response.ok) throw new Error('Daftar region tidak dapat dimuat.');
+        const payload = await response.json();
+        const regions = Array.isArray(payload.data) ? payload.data : payload.data?.regions;
+        if (!Array.isArray(regions)) throw new Error('Format data region tidak valid.');
+        appRegions = Object.fromEntries(regions.map(region => [region.slug, region]));
+    }
 
-        btnRawamangun.className = "btn btn-sm btn-outline-success active";
-        btnUnesa.className = "btn btn-sm btn-outline-secondary";
-    });
+    async function loadAppMap(regionSlug) {
+        const region = appRegions[regionSlug];
+        if (!region) throw new Error('Region tidak tersedia.');
+        activeRegion = regionSlug;
+        const center = regionCenter(region);
+        map.setView(center, 15);
+        mapLayers.clearLayers();
+        const [reportsResponse, hubsResponse] = await Promise.all([
+            fetch(`${appApi}/reports?region_slug=${encodeURIComponent(regionSlug)}&per_page=100`, {headers: {Accept: 'application/json'}}),
+            fetch(`${appApi}/safety-hubs?region_slug=${encodeURIComponent(regionSlug)}`, {headers: {Accept: 'application/json'}})
+        ]);
+        if (!reportsResponse.ok || !hubsResponse.ok) throw new Error('Data laporan atau safety hub gagal dimuat.');
+        const reportsPayload = await reportsResponse.json();
+        const hubsPayload = await hubsResponse.json();
+        const reports = Array.isArray(reportsPayload.data) ? reportsPayload.data : [];
+        const hubs = Array.isArray(hubsPayload.data) ? hubsPayload.data : [];
+
+        reports.forEach(report => {
+            L.circleMarker([Number(report.lat), Number(report.lng)], {
+                radius: 8, color: '#fff', weight: 2, fillColor: reportColor(report.category), fillOpacity: .95
+            }).bindPopup(`<strong>${escapeHtml(report.label || report.category)}</strong><br>Status: ${escapeHtml(report.status)}<br>${escapeHtml(report.description || '')}`).addTo(mapLayers);
+        });
+        hubs.forEach(hub => {
+            L.circleMarker([Number(hub.lat), Number(hub.lng)], {
+                radius: 7, color: '#fff', weight: 2, fillColor: '#2563eb', fillOpacity: .95
+            }).bindPopup(`<strong>${escapeHtml(hub.name)}</strong><br>Safety Hub · ${escapeHtml(hub.type)}`).addTo(mapLayers);
+        });
+    }
+
+    function selectAppRegion(button) {
+        document.querySelectorAll('[data-region]').forEach(item => {
+            item.className = item === button
+                ? 'btn btn-sm btn-outline-success active'
+                : 'btn btn-sm btn-outline-secondary';
+        });
+        loadAppMap(button.dataset.region).catch(error => alert(error.message));
+    }
+
+    document.querySelectorAll('[data-region]').forEach(button => button.addEventListener('click', () => selectAppRegion(button)));
+    loadAppRegions()
+        .then(() => loadAppMap(activeRegion))
+        .catch(error => alert(`Gagal memuat peta: ${error.message}`));
 </script>
 </body>
 </html>

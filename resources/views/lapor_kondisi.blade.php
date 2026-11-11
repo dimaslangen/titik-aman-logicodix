@@ -193,6 +193,24 @@
 
                     <!-- 3. Keterangan / Judul Laporan -->
                     <div class="mb-4">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label for="regionLaporan" class="form-label fw-bold text-dark small">Region</label>
+                                <select class="form-select" id="regionLaporan" required>
+                                    <option value="unesa-lidah-wetan">UNESA Lidah Wetan</option>
+                                    <option value="unesa-ketintang">UNESA Ketintang</option>
+                                    <option value="rawamangun">Rawamangun</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="kategoriLaporan" class="form-label fw-bold text-dark small">Kategori</label>
+                                <select class="form-select" id="kategoriLaporan" required>
+                                    <option value="penerangan_padam">Penerangan Padam / Terbatas</option>
+                                    <option value="area_sepi">Kondisi Area Sepi / Perlu Perhatian</option>
+                                    <option value="hambatan_fisik">Hambatan Fisik Jalan</option>
+                                </select>
+                            </div>
+                        </div>
                         <label for="deskripsiLaporan" class="form-label fw-bold text-dark small"><span class="badge bg-dark rounded-circle me-1">2</span> Keterangan Kondisi</label>
                         <textarea class="form-control rounded-3" id="deskripsiLaporan" rows="3" placeholder="Contoh: Lampu penerangan jalan mati total, jalan gelap dan rawan..." required></textarea>
                     </div>
@@ -201,6 +219,7 @@
                     <button type="button" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm" id="btnKirimLaporan">
                         <i class="bi bi-upload me-2"></i> Kirim Laporan
                     </button>
+                    <div id="statusKirimLaporan" class="small text-center text-muted mt-2" role="status"></div>
 
                 </div>
 
@@ -214,6 +233,9 @@
    <script>
     let mediaStream = null;
     let useFrontCamera = false; // Default pakai kamera belakang (environment) untuk foto kondisi jalan
+    let currentLatitude = null;
+    let currentLongitude = null;
+    let capturedPhoto = null;
 
     // Fungsi Menyalakan Kamera (Diperbarui agar aman dari race condition stream)
     async function nyalakanKamera() {
@@ -277,6 +299,7 @@
         // Ubah hasil canvas ke format gambar (Base64)
         let imageDataURL = canvas.toDataURL('image/png');
         imgPreview.src = imageDataURL;
+        canvas.toBlob(blob => { capturedPhoto = blob; }, 'image/png');
 
         // Matikan stream kamera setelah dijepret
         matikanKameraStreamSaja();
@@ -314,28 +337,69 @@
         nyalakanKamera();
     }
 
-    // Simulasi Kirim Laporan
+    async function kirimLaporan() {
+        const button = document.getElementById('btnKirimLaporan');
+        const status = document.getElementById('statusKirimLaporan');
+        const description = document.getElementById('deskripsiLaporan')?.value.trim();
+        const token = localStorage.getItem('ta_token');
+        if (!token) {
+            alert('Silakan masuk terlebih dahulu untuk mengirim laporan.');
+            return;
+        }
+        if (!description || !capturedPhoto || currentLatitude === null || currentLongitude === null) {
+            alert('Lengkapi deskripsi, foto kamera, dan lokasi GPS terlebih dahulu.');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('region_slug', document.getElementById('regionLaporan').value);
+        formData.append('category', document.getElementById('kategoriLaporan').value);
+        formData.append('lat', currentLatitude);
+        formData.append('lng', currentLongitude);
+        formData.append('user_lat', currentLatitude);
+        formData.append('user_lng', currentLongitude);
+        formData.append('description', description);
+        formData.append('photo', capturedPhoto, 'laporan-kondisi.png');
+        button.disabled = true;
+        status.textContent = 'Mengirim foto dan menunggu verifikasi AI Gemini...';
+        try {
+            const response = await fetch('/api/v1/reports', {
+                method: 'POST',
+                headers: {Accept: 'application/json', Authorization: `Bearer ${token}`},
+                body: formData
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (response.status === 401) throw new Error('Sesi login berakhir. Silakan masuk kembali.');
+            if (!response.ok) throw new Error(payload.message || 'Laporan gagal dikirim.');
+            alert(payload.message || 'Laporan berhasil dikirim.');
+            window.location.href = '/app';
+        } catch (error) {
+            status.textContent = '';
+            alert(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const btnKirim = document.getElementById('btnKirimLaporan');
         if (btnKirim) {
-            btnKirim.addEventListener('click', function() {
-                const ket = document.getElementById('deskripsiLaporan')?.value;
-                const imgPreviewSrc = document.getElementById('imgPreview')?.src;
-                const previewContainer = document.getElementById('previewContainer');
-
-                if (!ket) {
-                    alert('Mohon isi keterangan kondisi terlebih dahulu!');
-                    return;
-                }
-                if (!imgPreviewSrc || previewContainer?.classList.contains('d-none')) {
-                    alert('Mohon ambil foto kondisi jalan terlebih dahulu!');
-                    return;
-                }
-
-                alert('Laporan beserta foto berhasil dikirim!');
-                window.location.href = '/app';
-            });
+            btnKirim.addEventListener('click', kirimLaporan);
         }
+        fetch('/api/v1/regions', {headers: {Accept: 'application/json'}})
+            .then(response => response.ok ? response.json() : Promise.reject(new Error('Region gagal dimuat.')))
+            .then(payload => {
+                const regions = Array.isArray(payload.data) ? payload.data : [];
+                const select = document.getElementById('regionLaporan');
+                if (!select || !regions.length) return;
+                select.innerHTML = '';
+                regions.forEach(region => {
+                    const option = document.createElement('option');
+                    option.value = region.slug;
+                    option.textContent = region.name;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Gagal memuat region laporan:', error));
 
         // Jalankan fungsi deteksi GPS otomatis begitu halaman dibuka
         deteksiLokasiGPS();
@@ -355,6 +419,8 @@
             navigator.geolocation.getCurrentPosition(async function(position) {
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
+                currentLatitude = lat;
+                currentLongitude = lon;
                 const akurasi = Math.round(position.coords.accuracy);
 
                 lokasiTeks.innerText = `Lat: ${lat.toFixed(5)}, Lon: ${lon.toFixed(5)}`;
