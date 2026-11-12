@@ -12,14 +12,36 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        body {
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
             background-color: #f4f7f6;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        .app-wrapper {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
         .sidebar {
+            width: 260px;
+            min-width: 260px;
+            max-width: 260px;
+            height: 100vh;
             background: #ffffff;
-            min-height: 100vh;
             border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .main-content {
+            flex: 1 1 auto;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 1.5rem;
         }
         .nav-link {
             color: #4a5568;
@@ -78,52 +100,56 @@
 </head>
 <body>
 
-    <div class="container-fluid">
-        <div class="row">
-            
-            <!-- SIDEBAR ADMIN KIRI -->
-            <div class="col-md-3 col-lg-2 px-3 py-4 sidebar d-flex flex-column justify-content-between">
-                <div>
-                    <!-- Logo / Brand -->
-                    <div class="d-flex align-items-center mb-4 px-2">
-                        <div class="bg-success text-white p-2 rounded-3 me-2">
-                            <i class="bi bi-shield-check fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-0 text-dark">TitikAman</h5>
-                            <small class="text-muted" style="font-size: 10px;">CIVIC SAFETY GRID</small>
-                        </div>
+    <div class="app-wrapper">
+        
+        <!-- SIDEBAR ADMIN KIRI -->
+        <div class="sidebar px-3 py-4 d-flex flex-column justify-content-between">
+            <div>
+                <!-- Logo / Brand -->
+                <div class="d-flex align-items-center mb-4 px-2">
+                    <div class="bg-success text-white p-2 rounded-3 me-2">
+                        <i class="bi bi-shield-check fs-4"></i>
                     </div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">TitikAman</h5>
+                        <small class="text-muted" style="font-size: 10px;">CIVIC SAFETY GRID</small>
+                    </div>
+                </div>
 
-                    <!-- Menu Navigasi Admin -->
-                    <ul class="nav flex-column mb-4">
-                        <li class="nav-item">
-                            <a href="/admin" class="nav-link active py-2 px-3">
-                                <i class="bi bi-bar-chart-line me-2"></i> Overview
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#moderasiSection" class="nav-link py-2 px-3 d-flex justify-content-between align-items-center">
-                                <span><i class="bi bi-exclamation-triangle me-2"></i> Moderasi</span>
-                                <span class="badge bg-danger rounded-pill" style="font-size: 10px;" id="badgePendingModeration">0</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/app" class="nav-link py-2 px-3">
-                                <i class="bi bi-map me-2"></i> Peta Warga
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/rute-saya" class="nav-link py-2 px-3">
-                                <i class="bi bi-signpost-split me-2"></i> Navigasi Rute
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/lapor-kondisi" class="nav-link py-2 px-3">
-                                <i class="bi bi-camera me-2"></i> Form Laporan
-                            </a>
-                        </li>
-                    </ul>
+                <!-- Menu Navigasi Admin -->
+                <ul class="nav flex-column mb-4">
+                    <li class="nav-item">
+                        <a href="/admin" class="nav-link active py-2 px-3">
+                            <i class="bi bi-bar-chart-line me-2"></i> Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#moderasiSection" class="nav-link py-2 px-3 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-exclamation-triangle me-2"></i> Moderasi</span>
+                            <span class="badge bg-danger rounded-pill" style="font-size: 10px;" id="badgePendingModeration">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/app" class="nav-link py-2 px-3">
+                            <i class="bi bi-map me-2"></i> Peta Warga
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/rute-saya" class="nav-link py-2 px-3">
+                            <i class="bi bi-signpost-split me-2"></i> Navigasi Rute
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/safety-hubs-ui" class="nav-link py-2 px-3">
+                            <i class="bi bi-building me-2"></i> Direktori Hub
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/lapor-kondisi" class="nav-link py-2 px-3">
+                            <i class="bi bi-camera me-2"></i> Form Laporan
+                        </a>
+                    </li>
+                </ul>
 
                     <!-- Card Status Grid & API -->
                     <div class="p-3 bg-light rounded-4 border-0 mb-3">
@@ -154,7 +180,7 @@
             </div>
 
             <!-- KONTEN UTAMA KANAN (Command Center) -->
-            <div class="col-md-9 col-lg-10 p-4">
+            <div class="main-content">
                 
                 <!-- Sub-Header & Location Toggles -->
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -326,9 +352,7 @@
                 </div>
 
             </div>
-
         </div>
-    </div>
 
     <!-- Modal Panel Pemantauan & Penanganan SOS Admin (FR-04.4) -->
     <div class="modal fade" id="adminSosModal" tabindex="-1" aria-labelledby="adminSosModalLabel" aria-hidden="true">
