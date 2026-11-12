@@ -1,4 +1,4 @@
-@extends('layouts.base', ['active' => 'rute'])
+@extends('layouts.app')
 
 @section('title', 'TitikAman - Navigasi Rute SafePass')
 
@@ -23,6 +23,40 @@
         border-color: #16a34a !important;
         background-color: #f0fdf4 !important;
         box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+    }
+    .route-search-panel { max-width: 760px; }
+    .route-search-row { position: relative; }
+    .route-search-row .route-icon {
+        width: 1.25rem;
+        flex: 0 0 1.25rem;
+        text-align: center;
+    }
+    .route-search-row input { min-width: 0; }
+    .route-suggestions {
+        position: absolute;
+        z-index: 1000;
+        left: 2.75rem;
+        right: .75rem;
+        top: calc(100% + .25rem);
+    }
+    .destination-pin {
+        background: #dc2626;
+        border: 3px solid #fff;
+        border-radius: 50% 50% 50% 0;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .35);
+        height: 24px;
+        transform: rotate(-45deg);
+        width: 24px;
+    }
+    .destination-pin::after {
+        background: #fff;
+        border-radius: 50%;
+        content: '';
+        height: 6px;
+        left: 6px;
+        position: absolute;
+        top: 6px;
+        width: 6px;
     }
 </style>
 @endpush
@@ -51,29 +85,39 @@
         </span>
     </x-topbar>
 
-    <!-- Bar Input Asal & Tujuan dengan Pilihan Wilayah -->
-    <div class="bg-white p-3 rounded-4 shadow-sm mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3">
-        <div class="d-flex align-items-center gap-2 flex-grow-1 flex-wrap">
-            <div class="input-group input-group-sm" style="max-width: 320px;">
-                <span class="input-group-text bg-success-subtle text-success border-0"><i class="bi bi-geo-alt-fill"></i></span>
-                <select class="form-select bg-light border-0 fw-semibold" id="pilihanAsal">
-                    <option value="unesa-lidah-wetan">UNESA Lidah Wetan, Surabaya</option>
-                    <option value="unesa-ketintang">UNESA Ketintang, Surabaya</option>
-                    <option value="rawamangun">Rawamangun, Jakarta Timur</option>
-                </select>
-            </div>
-            <i class="bi bi-arrow-right text-muted"></i>
-            <div class="input-group input-group-sm flex-grow-1" style="max-width: 340px;">
-                <span class="input-group-text bg-danger-subtle text-danger border-0"><i class="bi bi-flag-fill"></i></span>
-                <input type="number" step="any" class="form-control bg-light border-0" id="destinationLat" placeholder="Tujuan latitude">
-                <input type="number" step="any" class="form-control bg-light border-0" id="destinationLng" placeholder="Tujuan longitude">
-            </div>
+    <!-- Panel Pencarian Rute ala Google Maps -->
+    <div class="bg-white p-3 p-md-4 rounded-4 shadow-sm mb-3 route-search-panel">
+        <div class="d-flex flex-wrap gap-2 mb-3" role="group" aria-label="Moda transportasi">
+            <button type="button" class="btn btn-sm btn-outline-success mode-tab rounded-pill px-3" data-mode="mobil"><i class="bi bi-car-front-fill me-1"></i> Mobil</button>
+            <button type="button" class="btn btn-sm btn-success mode-tab active rounded-pill px-3" data-mode="motor"><i class="bi bi-bicycle me-1"></i> Motor</button>
+            <button type="button" class="btn btn-sm btn-outline-success mode-tab rounded-pill px-3" data-mode="jalan_kaki"><i class="bi bi-person-walking me-1"></i> Jalan kaki</button>
         </div>
-        <div>
-            <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
-                <i class="bi bi-cursor me-1"></i> Klik titik di peta untuk pilih tujuan
-            </span>
+        <div class="d-flex align-items-center gap-2">
+            <div class="flex-grow-1">
+                <div class="route-search-row d-flex align-items-center gap-2 border rounded-3 px-3 py-2 mb-2">
+                    <i class="bi bi-circle-fill text-success route-icon"></i>
+                    <select class="form-select form-select-sm border-0 shadow-none fw-semibold p-0" id="pilihanAsal" aria-label="Pilih region asal">
+                        <option value="unesa-lidah-wetan">UNESA Lidah Wetan, Surabaya</option>
+                        <option value="unesa-ketintang">UNESA Ketintang, Surabaya</option>
+                        <option value="rawamangun">Rawamangun, Jakarta Timur</option>
+                    </select>
+                    <button type="button" class="btn btn-light btn-sm rounded-circle" id="useCurrentLocation" title="Gunakan lokasi saya" aria-label="Gunakan lokasi saya"><i class="bi bi-crosshair"></i></button>
+                </div>
+                <div class="route-search-row d-flex align-items-center gap-2 border rounded-3 px-3 py-2">
+                    <i class="bi bi-geo-alt-fill text-danger route-icon"></i>
+                    <input type="search" class="form-control form-control-sm border-0 shadow-none p-0" id="destinationSearch" placeholder="Cari tujuan, misalnya UNJ atau RS Persahabatan" autocomplete="off">
+                    <button type="button" class="btn btn-light btn-sm rounded-circle" id="searchDestination" title="Cari tujuan" aria-label="Cari tujuan"><i class="bi bi-search"></i></button>
+                    <div id="destinationSuggestions" class="route-suggestions bg-white border rounded-3 shadow-sm d-none"></div>
+                </div>
+                <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i> Klik peta untuk memilih titik tujuan.</small>
+            </div>
+            <button type="button" class="btn btn-outline-secondary rounded-circle flex-shrink-0" id="swapRoutePoints" title="Tukar asal dan tujuan" aria-label="Tukar asal dan tujuan">⇅</button>
         </div>
+        <input type="hidden" id="originLat">
+        <input type="hidden" id="originLng">
+        <input type="hidden" id="destinationLat">
+        <input type="hidden" id="destinationLng">
+        <input type="hidden" id="routeMode" value="motor">
     </div>
 
     <!-- Area Peta Leaflet Komparasi Rute -->
@@ -83,29 +127,10 @@
 
     <!-- Panel Bawah: Pilihan Rute Perjalanan -->
     <div class="bg-white p-4 rounded-4 shadow-sm">
-        <div class="row g-2 mb-3">
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold text-muted mb-1">Asal Latitude</label>
-                <input type="number" step="any" class="form-control form-control-sm" id="originLat" placeholder="Asal latitude">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold text-muted mb-1">Asal Longitude</label>
-                <input type="number" step="any" class="form-control form-control-sm" id="originLng" placeholder="Asal longitude">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold text-muted mb-1">Moda Transportasi</label>
-                <div class="btn-group w-100" role="group" aria-label="Moda transportasi">
-                    <button type="button" class="btn btn-sm btn-outline-success mode-tab" data-mode="mobil">Mobil</button>
-                    <button type="button" class="btn btn-sm btn-success mode-tab active" data-mode="motor">Motor</button>
-                    <button type="button" class="btn btn-sm btn-outline-success mode-tab" data-mode="jalan_kaki">Jalan kaki</button>
-                </div>
-                <input type="hidden" id="routeMode" value="motor">
-            </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="button" class="btn btn-success btn-sm w-100 py-2 fw-bold shadow-sm" id="compareRoutesButton">
-                    <i class="bi bi-search me-1"></i> Cari & Bandingkan
-                </button>
-            </div>
+        <div class="mb-3">
+            <button type="button" class="btn btn-success w-100 py-2 fw-bold shadow-sm" id="compareRoutesButton">
+                <i class="bi bi-search me-1"></i> Cari & Bandingkan Rute
+            </button>
         </div>
 
         <div id="routeStatus" class="alert d-none py-2 mb-3"></div>
@@ -207,11 +232,14 @@
 
     const routeLayer = L.layerGroup().addTo(mapRute);
     const markersLayer = L.layerGroup().addTo(mapRute);
+    const selectionLayer = L.layerGroup().addTo(mapRute);
 
     let routeRegions = {};
     let lastRouteRequest = null;
     let lastRouteData = null;
     let shareModalInstance = null;
+    let originMarker = null;
+    let destinationMarker = null;
 
     const $route = id => document.getElementById(id);
     const showRouteStatus = (message, type = 'danger') => {
@@ -227,14 +255,119 @@
         .filter(coordinate => Array.isArray(coordinate) && coordinate.length >= 2)
         .map(coordinate => [coordinate[1], coordinate[0]]);
 
+    const destinationIcon = L.divIcon({
+        className: '',
+        html: '<div class="destination-pin"></div>',
+        iconSize: [24, 24],
+        iconAnchor: [12, 24],
+        popupAnchor: [0, -22]
+    });
+
+    function currentRegion() {
+        return routeRegions[$route('pilihanAsal').value];
+    }
+
+    function updateOriginLabel(label) {
+        const option = $route('pilihanAsal').selectedOptions[0];
+        if (option) option.textContent = label;
+    }
+
+    function renderSelectionMarkers() {
+        selectionLayer.clearLayers();
+        const originLat = Number($route('originLat').value);
+        const originLng = Number($route('originLng').value);
+        const destinationLat = Number($route('destinationLat').value);
+        const destinationLng = Number($route('destinationLng').value);
+
+        if (Number.isFinite(originLat) && Number.isFinite(originLng)) {
+            originMarker = L.circleMarker([originLat, originLng], {
+                radius: 8, color: '#fff', weight: 3, fillColor: '#16a34a', fillOpacity: 1
+            }).bindPopup('<strong>Titik Asal</strong>').addTo(selectionLayer);
+        }
+
+        if (Number.isFinite(destinationLat) && Number.isFinite(destinationLng)) {
+            const address = $route('destinationSearch').value || 'Titik tujuan';
+            destinationMarker = L.marker([destinationLat, destinationLng], {icon: destinationIcon})
+                .bindPopup(`<strong>Tujuan</strong><br>${escapeHtml(address)}`)
+                .addTo(selectionLayer);
+        }
+    }
+
+    function setDestinationPoint(lat, lng, address = '') {
+        $route('destinationLat').value = Number(lat).toFixed(5);
+        $route('destinationLng').value = Number(lng).toFixed(5);
+        if (address) $route('destinationSearch').value = address;
+        renderSelectionMarkers();
+    }
+
+    function regionViewbox() {
+        const region = currentRegion();
+        const center = region?.center || {lat: region?.center_lat, lng: region?.center_lng};
+        const lat = Number(center?.lat);
+        const lng = Number(center?.lng);
+        const offset = 0.15;
+        return `${lng - offset},${lat + offset},${lng + offset},${lat - offset}`;
+    }
+
+    async function reverseGeocode(lat, lng) {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=18&addressdetails=1`, {
+            headers: {'Accept': 'application/json', 'Accept-Language': 'id'}
+        });
+        if (!response.ok) throw new Error('Alamat titik tujuan tidak dapat dimuat.');
+        const payload = await response.json();
+        return payload.display_name || `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}`;
+    }
+
+    function renderDestinationSuggestions(results) {
+        const container = $route('destinationSuggestions');
+        container.innerHTML = '';
+        results.slice(0, 5).forEach(result => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-light text-start w-100 border-0 rounded-0 small';
+            button.textContent = result.display_name;
+            button.addEventListener('click', () => {
+                setDestinationPoint(result.lat, result.lon, result.display_name);
+                mapRute.flyTo([Number(result.lat), Number(result.lon)], 16);
+                container.classList.add('d-none');
+            });
+            container.appendChild(button);
+        });
+        container.classList.toggle('d-none', !results.length);
+    }
+
+    async function searchDestination() {
+        const query = $route('destinationSearch').value.trim();
+        if (!query) {
+            showRouteStatus('Masukkan nama tempat atau alamat tujuan terlebih dahulu.');
+            return;
+        }
+
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&viewbox=${encodeURIComponent(regionViewbox())}&bounded=1&q=${encodeURIComponent(query)}`, {
+            headers: {'Accept': 'application/json', 'Accept-Language': 'id'}
+        });
+        if (!response.ok) throw new Error('Pencarian alamat tujuan gagal.');
+        const results = await response.json();
+        renderDestinationSuggestions(results);
+        if (!results.length) {
+            showRouteStatus('Alamat tujuan tidak ditemukan di sekitar region aktif.');
+            return;
+        }
+
+        const first = results[0];
+        setDestinationPoint(first.lat, first.lon, first.display_name);
+        mapRute.flyTo([Number(first.lat), Number(first.lon)], 16);
+        showRouteStatus('Tujuan ditemukan. Klik "Cari & Bandingkan Rute".', 'success');
+    }
+
     function setRegionDefaults() {
         const region = routeRegions[$route('pilihanAsal').value];
         if (!region) return;
         const center = region.center;
         $route('originLat').value = center.lat;
         $route('originLng').value = center.lng;
-        $route('destinationLat').value = (Number(center.lat) + 0.005).toFixed(5);
-        $route('destinationLng').value = (Number(center.lng) + 0.005).toFixed(5);
+        updateOriginLabel(region.name || $route('pilihanAsal').value);
+        setDestinationPoint(Number(center.lat) + 0.005, Number(center.lng) + 0.005, 'Pilih tujuan di peta atau cari alamat');
         mapRute.setView([center.lat, center.lng], 15);
     }
 
@@ -262,16 +395,7 @@
             mapRute.fitBounds(points, { padding: [35, 35], maxZoom: 17 });
         }
 
-        const origin = [Number(lastRouteRequest.origin_lat), Number(lastRouteRequest.origin_lng)];
-        const destination = [Number(lastRouteRequest.destination_lat), Number(lastRouteRequest.destination_lng)];
-        
-        L.circleMarker(origin, {
-            radius: 8, color: '#fff', weight: 2, fillColor: '#16a34a', fillOpacity: 1
-        }).bindPopup('<strong>Titik Awal (Asal)</strong>').addTo(markersLayer);
-
-        L.circleMarker(destination, {
-            radius: 8, color: '#fff', weight: 2, fillColor: '#dc2626', fillOpacity: 1
-        }).bindPopup('<strong>Titik Akhir (Tujuan)</strong>').addTo(markersLayer);
+        renderSelectionMarkers();
 
         const hubsPassed = data.safepass?.hubs_passed || [];
         hubsPassed.forEach(hub => {
@@ -427,6 +551,9 @@
             $route('originLng').value = shared.origin_lng;
             $route('destinationLat').value = shared.destination_lat;
             $route('destinationLng').value = shared.destination_lng;
+            updateOriginLabel('Lokasi asal rute dibagikan');
+            $route('destinationSearch').value = 'Tujuan rute dibagikan';
+            renderSelectionMarkers();
 
             lastRouteRequest = {
                 origin_lat: shared.origin_lat,
@@ -496,18 +623,75 @@
     }
 
     mapRute.on('click', function(e) {
-        $route('destinationLat').value = e.latlng.lat.toFixed(5);
-        $route('destinationLng').value = e.latlng.lng.toFixed(5);
-        showRouteStatus('Titik tujuan diperbarui dari peta. Klik "Cari & Bandingkan".', 'info');
+        setDestinationPoint(e.latlng.lat, e.latlng.lng, 'Memuat alamat...');
+        mapRute.flyTo(e.latlng, Math.max(mapRute.getZoom(), 15));
+        reverseGeocode(e.latlng.lat, e.latlng.lng)
+            .then(address => {
+                setDestinationPoint(e.latlng.lat, e.latlng.lng, address);
+                showRouteStatus('Alamat tujuan diperbarui dari peta. Klik "Cari & Bandingkan".', 'info');
+            })
+            .catch(error => {
+                setDestinationPoint(e.latlng.lat, e.latlng.lng, `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`);
+                showRouteStatus(error.message);
+            });
     });
 
     $route('pilihanAsal').addEventListener('change', setRegionDefaults);
     document.querySelectorAll('.mode-tab').forEach(button => button.addEventListener('click', () => {
         document.querySelectorAll('.mode-tab').forEach(tab => {
-            tab.className = tab === button ? 'btn btn-sm btn-success mode-tab active' : 'btn btn-sm btn-outline-success mode-tab';
+            tab.className = tab === button
+                ? 'btn btn-sm btn-success mode-tab active rounded-pill px-3'
+                : 'btn btn-sm btn-outline-success mode-tab rounded-pill px-3';
         });
         $route('routeMode').value = button.dataset.mode;
     }));
+
+    $route('searchDestination').addEventListener('click', () => searchDestination().catch(error => showRouteStatus(error.message)));
+    $route('destinationSearch').addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            searchDestination().catch(error => showRouteStatus(error.message));
+        }
+    });
+    $route('destinationSearch').addEventListener('focus', () => {
+        if ($route('destinationSuggestions').children.length) $route('destinationSuggestions').classList.remove('d-none');
+    });
+    $route('useCurrentLocation').addEventListener('click', () => {
+        if (!navigator.geolocation) {
+            showRouteStatus('Browser tidak mendukung lokasi GPS.');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(async position => {
+            const {latitude, longitude} = position.coords;
+            $route('originLat').value = latitude.toFixed(5);
+            $route('originLng').value = longitude.toFixed(5);
+            updateOriginLabel('Lokasi Saya (GPS)');
+            renderSelectionMarkers();
+            mapRute.flyTo([latitude, longitude], 16);
+            try {
+                updateOriginLabel(await reverseGeocode(latitude, longitude));
+            } catch (error) {
+                showRouteStatus(error.message);
+            }
+        }, () => showRouteStatus('Lokasi GPS tidak dapat diakses.'));
+    });
+    $route('swapRoutePoints').addEventListener('click', () => {
+        const originLabel = $route('pilihanAsal').selectedOptions[0]?.textContent || 'Asal';
+        const destinationLabel = $route('destinationSearch').value || 'Tujuan';
+        const originLat = $route('originLat').value;
+        const originLng = $route('originLng').value;
+        $route('originLat').value = $route('destinationLat').value;
+        $route('originLng').value = $route('destinationLng').value;
+        $route('destinationLat').value = originLat;
+        $route('destinationLng').value = originLng;
+        updateOriginLabel(destinationLabel);
+        $route('destinationSearch').value = originLabel;
+        renderSelectionMarkers();
+        mapRute.fitBounds([
+            [Number($route('originLat').value), Number($route('originLng').value)],
+            [Number($route('destinationLat').value), Number($route('destinationLng').value)]
+        ], {padding: [35, 35]});
+    });
 
     $route('compareRoutesButton').addEventListener('click', compareRoutes);
     $route('shareRouteButton').addEventListener('click', shareRoute);

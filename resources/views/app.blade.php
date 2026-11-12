@@ -1,4 +1,4 @@
-@extends('layouts.base', ['active' => 'app'])
+@extends('layouts.app')
 
 @section('title', 'TitikAman - Safe Navigation App')
 
@@ -21,11 +21,7 @@
 
     <!-- Filter / Quick Bar di atas Peta -->
     <div class="bg-white p-3 rounded-4 shadow-sm mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
-        <div class="d-flex gap-2 flex-wrap">
-            <button id="btn-unesa" data-region="unesa-lidah-wetan" class="btn btn-sm btn-outline-success active rounded-pill px-3 fw-semibold">UNESA Lidah Wetan</button>
-            <button id="btn-ketintang" data-region="unesa-ketintang" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">UNESA Ketintang</button>
-            <button id="btn-rawamangun" data-region="rawamangun" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">Rawamangun</button>
-        </div>
+        <x-region-switcher />
         <div class="d-flex align-items-center gap-2">
             <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
                 <i class="bi bi-geo-alt-fill me-1"></i> GPS Aktif

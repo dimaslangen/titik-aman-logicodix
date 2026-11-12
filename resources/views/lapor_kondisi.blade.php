@@ -1,4 +1,4 @@
-@extends('layouts.base', ['active' => 'lapor'])
+@extends('layouts.app')
 
 @section('title', 'TitikAman - Lapor Kondisi')
 
@@ -291,9 +291,18 @@
 
             if (!response.ok) throw new Error(payload.message || 'Laporan gagal dikirim.');
 
-            let successMsg = payload.message || 'Laporan berhasil dikirim.';
-            if (payload.ai_check) {
-                successMsg += `\n\n[Analisis AI Gemini]\nStatus: ${payload.ai_check.status}\nCatatan: ${payload.ai_check.notes || '-'}`;
+            const reportStatus = payload.data?.status || payload.status;
+            const aiCheck = payload.data?.ai_check || payload.ai_check;
+
+            let successMsg = reportStatus === 'PENDING_MODERATION'
+                ? 'Laporan ditahan untuk moderasi admin karena tidak lolos validasi AI.'
+                : (payload.message || 'Laporan berhasil dikirim.');
+
+            if (aiCheck) {
+                const aiStatus = aiCheck.is_valid === true
+                    ? 'Lolos Validasi AI (UNVERIFIED)'
+                    : 'Ditahan AI / Perlu Moderasi (PENDING_MODERATION)';
+                successMsg += `\n\n[Analisis AI Gemini]\nStatus: ${aiStatus}\nCatatan: ${aiCheck.reason || '-'}`;
             }
             alert(successMsg);
             window.location.href = '/app';
