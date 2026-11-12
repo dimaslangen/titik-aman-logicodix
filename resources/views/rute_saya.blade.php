@@ -1,4 +1,4 @@
-@extends('layouts.base', ['active' => 'rute'])
+@extends('layouts.app')
 
 @section('title', 'TitikAman - Navigasi Rute SafePass')
 

@@ -1,20 +1,3 @@
-<!-- Floating Tombol Darurat SOS 110 -->
-<button type="button" 
-        class="btn btn-danger position-fixed shadow-lg d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-pill"
-        style="bottom: 24px; right: 24px; z-index: 1040; font-weight: bold; font-size: 14px; animation: taPulseSos 2s infinite;"
-        data-bs-toggle="modal" data-bs-target="#sosEmergencyModal">
-    <i class="bi bi-exclamation-octagon-fill fs-5"></i>
-    <span>🚨 SOS 110</span>
-</button>
-
-<style>
-@keyframes taPulseSos {
-    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
-    70% { box-shadow: 0 0 0 14px rgba(220, 53, 69, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-}
-</style>
-
 <!-- Modal Darurat SOS 110 -->
 <div class="modal fade" id="sosEmergencyModal" tabindex="-1" aria-labelledby="sosEmergencyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

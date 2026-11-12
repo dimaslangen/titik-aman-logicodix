@@ -1,4 +1,4 @@
-@extends('layouts.base', ['active' => 'lapor'])
+@extends('layouts.app')
 
 @section('title', 'TitikAman - Lapor Kondisi')
 
