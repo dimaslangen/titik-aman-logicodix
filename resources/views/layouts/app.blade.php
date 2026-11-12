@@ -71,6 +71,7 @@
     <script>
         window.taApiBase = '/api/v1';
         window.taCurrentUser = null;
+        document.querySelectorAll('[data-admin-nav="true"]').forEach(item => item.classList.add('d-none'));
 
         window.taToggleSidebar = function() {};
 
@@ -104,6 +105,9 @@
                 window.taCurrentUser = payload.data;
                 const user = payload.data;
                 const initial = (user.name || 'U').charAt(0).toUpperCase();
+                if (user.role === 'admin') {
+                    document.querySelectorAll('[data-admin-nav="true"]').forEach(item => item.classList.remove('d-none'));
+                }
                 containers.forEach(container => {
                     container.innerHTML = `
                         <div class="dropdown">

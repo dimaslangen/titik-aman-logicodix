@@ -18,7 +18,7 @@
     <p class="text-uppercase text-muted fw-bold small mb-2">Navigasi</p>
     <div class="d-grid gap-2">
         @foreach($links as $link)
-            <a href="{{ $link['url'] }}" class="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none {{ request()->routeIs($link['route']) ? 'bg-success-subtle text-success fw-semibold' : 'text-secondary' }}">
+            <a href="{{ $link['url'] }}" data-admin-nav="{{ $link['route'] === 'admin' ? 'true' : 'false' }}" class="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none {{ $link['route'] === 'admin' ? 'd-none' : '' }} {{ request()->routeIs($link['route']) ? 'bg-success-subtle text-success fw-semibold' : 'text-secondary' }}">
                 <i class="bi {{ $link['icon'] }}"></i>{{ $link['label'] }}
             </a>
         @endforeach
