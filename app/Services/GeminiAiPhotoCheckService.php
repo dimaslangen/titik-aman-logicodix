@@ -46,7 +46,7 @@ class GeminiAiPhotoCheckService implements AiPhotoCheckService
                 ];
             }
 
-            $model = (string) (config('services.gemini.model') ?: env('GEMINI_MODEL', 'gemini-2.5-flash'));
+            $model = (string) (config('services.gemini.model') ?: env('GEMINI_MODEL', 'gemini-3.6-flash'));
             $baseUrl = rtrim((string) (config('services.gemini.url') ?: env(
                 'GEMINI_API_URL',
                 'https://generativelanguage.googleapis.com/v1beta/models'
