@@ -53,7 +53,7 @@ class GeminiAiPhotoCheckService implements AiPhotoCheckService
             )), '/');
             $url = sprintf('%s/%s:generateContent?key=%s', $baseUrl, rawurlencode($model), rawurlencode($apiKey));
 
-            $response = Http::timeout(8)
+            $response = Http::timeout(25)
                 ->acceptJson()
                 ->post($url, [
                     'contents' => [
