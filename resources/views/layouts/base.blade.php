@@ -176,6 +176,16 @@
                 const user = json.data;
                 const initial = (user.name || 'U').charAt(0).toUpperCase();
 
+                // Tampilkan menu navigasi admin di sidebar HANYA jika role === 'admin'
+                const sidebarAdminNav = document.getElementById('sidebarAdminNav');
+                if (sidebarAdminNav) {
+                    if (user.role === 'admin') {
+                        sidebarAdminNav.classList.remove('d-none');
+                    } else {
+                        sidebarAdminNav.classList.add('d-none');
+                    }
+                }
+
                 container.innerHTML = `
                     <div class="dropdown">
                         <button class="btn btn-sm btn-light rounded-pill px-3 py-1 d-flex align-items-center gap-2 border shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">

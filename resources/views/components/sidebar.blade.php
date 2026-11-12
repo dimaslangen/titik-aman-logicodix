@@ -38,9 +38,9 @@
                 <i class="bi bi-exclamation-triangle me-2"></i> Lapor Kondisi
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item d-none" id="sidebarAdminNav">
             <a href="/admin" class="nav-link py-2 px-3 {{ ($active ?? '') === 'admin' ? 'active' : '' }}">
-                <i class="bi bi-shield-lock me-2"></i> Admin
+                <i class="bi bi-shield-lock me-2"></i> Admin Panel
             </a>
         </li>
     </ul>
