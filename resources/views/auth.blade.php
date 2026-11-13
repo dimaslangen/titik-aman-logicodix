@@ -3,35 +3,39 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="{{ asset('images/TitikAman(no-teks).png') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>Masuk — TitikAman</title>
 <style>
-:root{--navy:#1e293b;--navy2:#0f172a;--green:#10b981;--blue:#3b82f6;--mute:#94a3b8;--line:#334155}
+:root{--navy:#f8fafc;--navy2:#11653a;--green:#15803d;--blue:#15803d;--mute:#64748b;--line:#e2e8f0}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#0f172a;background:#fff}
-.side{background:var(--navy);color:#fff;padding:40px;display:flex;flex-direction:column;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;text-decoration:none;color:#fff}
-.mark{width:34px;height:34px;border-radius:10px;background:var(--green);color:var(--navy2);display:grid;place-items:center;font-weight:900;font-size:14px}
-.side h2{font-size:30px;line-height:1.2;margin:0 0 10px}.side p{color:#cbd5e1;margin:0;max-width:380px}
+body{margin:0;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;font-family:"Plus Jakarta Sans","Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:#0f172a;background:#fff}
+.side{background:#f8fafc;border-right:1px solid var(--line);padding:40px;display:flex;flex-direction:column;justify-content:space-between}
+.brand{display:inline-flex;align-items:center;text-decoration:none;color:#0f172a}
+.side h2{font-size:30px;line-height:1.2;margin:0 0 10px;color:#0f172a}.side p{color:#475569;margin:0;max-width:380px}
 .side small{color:var(--mute);font-size:12px;max-width:380px}
 .main{display:flex;align-items:center;justify-content:center;padding:32px}
 .box{width:100%;max-width:380px}
 .tabs{display:grid;grid-template-columns:1fr 1fr;background:#f1f5f9;border-radius:10px;padding:4px;margin-bottom:22px}
 .tabs a{text-align:center;text-decoration:none;color:#475569;font-weight:700;padding:9px;border-radius:8px;font-size:14px}
-.tabs a[aria-current=page]{background:#fff;color:#0f172a;box-shadow:0 1px 3px #0002}
+.tabs a[aria-current=page]{background:#fff;color:#11653a;box-shadow:0 1px 3px #0002}
 h1{margin:0 0 16px;font-size:22px}
 label{display:block;font-size:13px;font-weight:600;margin:0 0 4px}
 .field{display:block;width:100%;font:inherit;border:1px solid #cbd5e1;border-radius:8px;padding:11px 12px;margin-bottom:12px}
-.btn{display:block;width:100%;font:inherit;font-weight:800;border:0;border-radius:8px;padding:13px;background:var(--green);color:var(--navy2);cursor:pointer;margin-top:4px}
+.btn{display:block;width:100%;font:inherit;font-weight:800;border:0;border-radius:8px;padding:13px;background:linear-gradient(135deg,#11653a,#2fa33e);color:#fff;cursor:pointer;margin-top:4px}
 .btn:disabled{opacity:.6}
 .err{color:#dc2626;font-size:13px;min-height:18px;margin:0 0 8px}
 .alt{margin:18px 0 0;font-size:13px;color:#64748b;text-align:center}.alt a{color:#2563eb}
 a:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+input:focus-visible{border-color:#15803d;box-shadow:0 0 0 3px rgba(21,128,61,.15)}
 @media(max-width:820px){body{grid-template-columns:1fr}.side{padding:22px}.side h2,.side p,.side small{display:none}.side{flex-direction:row}}
 </style>
 </head>
 <body>
 <aside class="side">
-  <a class="brand" href="/"><span class="mark">TA</span>TitikAman</a>
+  <a class="brand" href="/"><x-brand-logo id="auth-logo" theme="light" size="lg" /></a>
   <div><h2>Ikut jaga jalan di sekitarmu.</h2><p>Dengan akun, kamu bisa melapor kondisi jalan, mengonfirmasi laporan warga lain (Up-Check), dan membagikan rute perjalananmu.</p></div>
   <small>Alat bantu informasi berbasis komunitas, bukan jaminan keselamatan absolut. Darurat: hubungi 110.</small>
 </aside>

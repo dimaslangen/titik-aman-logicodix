@@ -3,6 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{{ asset('images/TitikAman(no-teks).png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <title>Admin Login — TitikAman Command Center</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -10,35 +14,35 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            background-color: #0f172a;
-            color: #e2e8f0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            font-family: 'Plus Jakarta Sans', 'Instrument Sans', 'Segoe UI', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .login-card {
-            background-color: #1e293b;
-            border: 1px solid #334155;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: 16px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.10);
         }
         .form-control {
-            background-color: #0f172a;
-            border-color: #475569;
-            color: #f8fafc;
+            background-color: #ffffff;
+            border-color: #cbd5e1;
+            color: #0f172a;
         }
         .form-control:focus {
-            background-color: #0f172a;
-            border-color: #0d9488;
-            color: #fff;
-            box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.25);
+            background-color: #ffffff;
+            border-color: #15803d;
+            color: #0f172a;
+            box-shadow: 0 0 0 0.25rem rgba(21, 128, 61, 0.15);
         }
         .btn-teal {
-            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            background: linear-gradient(135deg, #11653a 0%, #2fa33e 100%);
             color: #ffffff;
             font-weight: 600;
             border: none;
@@ -52,10 +56,8 @@
 <body>
     <div class="login-card p-4 mx-3">
         <div class="text-center mb-4">
-            <div class="bg-success text-white d-inline-flex p-3 rounded-4 shadow-sm mb-2">
-                <i class="bi bi-shield-lock-fill fs-3"></i>
-            </div>
-            <h4 class="fw-bold text-white mb-1">TitikAman Admin</h4>
+            <x-brand-logo id="admin-login-logo" theme="light" size="lg" badge="ADMIN" />
+            <h4 class="fw-bold text-dark mt-3 mb-1">TitikAman Admin</h4>
             <small class="text-secondary">Civic Safety Command Center</small>
         </div>
 

@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ asset('images/TitikAman(no-teks).png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <title>TitikAman - Command Center Admin</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,13 +16,22 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
+        :root {
+            --ta-primary: #15803D;
+            --ta-primary-deep: #11653A;
+            --ta-lime: #65A30D;
+            --ta-lime-bright: #80C826;
+            --ta-active-bg: rgba(21, 128, 61, 0.10);
+            --ta-active-border: rgba(21, 128, 61, 0.22);
+        }
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #f4f7f6;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Plus Jakarta Sans', 'Instrument Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .app-wrapper {
             display: flex;
@@ -51,14 +64,39 @@
             transition: all 0.2s ease;
         }
         .nav-link:hover {
-            background-color: #e6fffa;
-            color: #0d9488;
+            background-color: var(--ta-active-bg);
+            color: var(--ta-primary-deep);
         }
         .nav-link.active {
-            background-color: #e6fffa;
-            color: #0d9488;
+            background-color: var(--ta-active-bg);
+            border: 1px solid var(--ta-active-border);
+            color: var(--ta-primary-deep);
             font-weight: 600;
         }
+        .nav-group-label {
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .14em;
+            margin: 1.25rem .75rem .5rem;
+        }
+        .preview-link { color: #64748b; }
+        .preview-link:hover { color: var(--ta-primary-deep); background-color: #f8fafc; }
+        .btn-success {
+            background: linear-gradient(135deg, var(--ta-primary-deep), #2fa33e);
+            border-color: var(--ta-primary-deep);
+        }
+        .btn-success:hover, .btn-success:focus {
+            background: linear-gradient(135deg, #0d5130, var(--ta-primary));
+            border-color: var(--ta-primary-deep);
+        }
+        .text-success { color: var(--ta-primary-deep) !important; }
+        .badge.bg-success { background-color: var(--ta-primary) !important; }
+        .form-control:focus, .form-select:focus, .form-check-input:focus {
+            border-color: var(--ta-primary);
+            box-shadow: 0 0 0 .25rem rgba(21, 128, 61, .15);
+        }
+        .moderation-search { min-width: 220px; }
         .metric-card {
             border: 1px solid #e2e8f0;
             border-radius: 16px;
@@ -106,47 +144,57 @@
         <div class="sidebar px-3 py-4 d-flex flex-column justify-content-between">
             <div>
                 <!-- Logo / Brand -->
-                <div class="d-flex align-items-center mb-4 px-2">
-                    <div class="bg-success text-white p-2 rounded-3 me-2">
-                        <i class="bi bi-shield-check fs-4"></i>
-                    </div>
-                    <div>
-                        <h5 class="fw-bold mb-0 text-dark">TitikAman</h5>
-                        <small class="text-muted" style="font-size: 10px;">CIVIC SAFETY GRID</small>
-                    </div>
+                <div class="mb-4 px-2">
+                    <x-brand-logo id="admin-sidebar-logo" theme="light" size="md" badge="ADMIN" />
+                    <small class="text-muted d-block mt-2" style="font-size: 10px; letter-spacing: 0.08em;">CIVIC SAFETY COMMAND CENTER</small>
                 </div>
 
                 <!-- Menu Navigasi Admin -->
-                <ul class="nav flex-column mb-4">
+                <p class="nav-group-label">COMMAND CENTER</p>
+                <ul class="nav flex-column mb-2 admin-section-nav">
                     <li class="nav-item">
-                        <a href="/admin" class="nav-link active py-2 px-3">
+                        <a href="#adminTop" class="nav-link active py-2 px-3" data-admin-nav-target="top">
                             <i class="bi bi-bar-chart-line me-2"></i> Overview
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#moderasiSection" class="nav-link py-2 px-3 d-flex justify-content-between align-items-center">
+                        <a href="#moderasiSection" class="nav-link py-2 px-3 d-flex justify-content-between align-items-center" data-admin-nav-target="moderasiSection">
                             <span><i class="bi bi-exclamation-triangle me-2"></i> Moderasi</span>
                             <span class="badge bg-danger rounded-pill" style="font-size: 10px;" id="badgePendingModeration">0</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/app" class="nav-link py-2 px-3">
-                            <i class="bi bi-map me-2"></i> Peta Warga
+                        <a href="#adminMap" class="nav-link py-2 px-3" data-admin-nav-target="adminMap">
+                            <i class="bi bi-activity me-2"></i> Patrol Heatmap
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/rute-saya" class="nav-link py-2 px-3">
-                            <i class="bi bi-signpost-split me-2"></i> Navigasi Rute
+                        <a href="#adminSosModal" class="nav-link py-2 px-3" data-bs-toggle="modal" data-bs-target="#adminSosModal">
+                            <i class="bi bi-telephone me-2"></i> Alert SOS
+                        </a>
+                    </li>
+                </ul>
+
+                <p class="nav-group-label">PRATINJAU WARGA</p>
+                <ul class="nav flex-column mb-4">
+                    <li class="nav-item">
+                        <a href="/app" class="nav-link preview-link py-2 px-3 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-map me-2"></i> Peta Warga</span><i class="bi bi-box-arrow-up-right small"></i>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/safety-hubs-ui" class="nav-link py-2 px-3">
-                            <i class="bi bi-building me-2"></i> Direktori Hub
+                        <a href="/rute-saya" class="nav-link preview-link py-2 px-3 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-signpost-split me-2"></i> Navigasi Rute</span><i class="bi bi-box-arrow-up-right small"></i>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/lapor-kondisi" class="nav-link py-2 px-3">
-                            <i class="bi bi-camera me-2"></i> Form Laporan
+                        <a href="/safety-hubs-ui" class="nav-link preview-link py-2 px-3 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-building me-2"></i> Direktori Hub</span><i class="bi bi-box-arrow-up-right small"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/lapor-kondisi" class="nav-link preview-link py-2 px-3 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-camera me-2"></i> Form Laporan</span><i class="bi bi-box-arrow-up-right small"></i>
                         </a>
                     </li>
                 </ul>
@@ -172,7 +220,7 @@
                                 <small class="text-muted d-block text-truncate" style="font-size: 10px;" id="adminEmail">admin@titikaman.id</small>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-outline-danger btn-sm p-1 rounded-circle" onclick="adminLogout()" title="Keluar">
+                        <button type="button" id="adminLogoutBtn" class="btn btn-outline-danger btn-sm p-1 rounded-circle" onclick="adminLogout()" title="Keluar">
                             <i class="bi bi-box-arrow-right"></i>
                         </button>
                     </div>
@@ -316,7 +364,9 @@
                             <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">ANTRIAN PEMERIKSAAN LAPORAN</small>
                             <h5 class="fw-bold text-dark mb-0">Moderasi Laporan Warga</h5>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                            <label for="searchModerasiInput" class="visually-hidden">Cari laporan</label>
+                            <input type="search" class="form-control form-control-sm rounded-pill moderation-search" id="searchModerasiInput" placeholder="Cari laporan..." autocomplete="off">
                             <label for="filterStatus" class="small fw-semibold text-secondary mb-0">Filter Status:</label>
                             <select class="form-select form-select-sm bg-light border-0 fw-semibold rounded-pill px-3" id="filterStatus" onchange="filterReportsByStatus()" style="width: 180px;">
                                 <option value="all">Semua Status</option>
@@ -686,9 +736,20 @@
         // Filter tabel moderasi
         function filterReportsByStatus() {
             const filter = document.getElementById('filterStatus')?.value || 'all';
+            const search = document.getElementById('searchModerasiInput')?.value.trim().toLowerCase() || '';
             let filtered = rawReportsList;
             if (filter !== 'all') {
-                filtered = rawReportsList.filter(r => r.status === filter);
+                filtered = filtered.filter(r => r.status === filter);
+            }
+            if (search) {
+                filtered = filtered.filter(r => [
+                    r.id,
+                    r.title,
+                    r.description,
+                    r.region_slug,
+                    r.category,
+                    r.status
+                ].some(value => String(value || '').toLowerCase().includes(search)));
             }
             renderReportsTable(filtered);
         }
@@ -919,6 +980,41 @@
                 loadAdminDashboard(this.dataset.region);
             });
         });
+
+        const searchModerasiInput = document.getElementById('searchModerasiInput');
+        if (searchModerasiInput) {
+            searchModerasiInput.addEventListener('input', filterReportsByStatus);
+        }
+
+        const adminNavLinks = document.querySelectorAll('[data-admin-nav-target]');
+        const mainContent = document.querySelector('.main-content');
+        const setActiveAdminNav = target => {
+            adminNavLinks.forEach(link => {
+                link.classList.toggle('active', link.dataset.adminNavTarget === target);
+            });
+        };
+        adminNavLinks.forEach(link => {
+            link.addEventListener('click', event => {
+                const target = link.dataset.adminNavTarget;
+                if (target === 'top') {
+                    event.preventDefault();
+                    mainContent?.scrollTo({ top: 0, behavior: 'smooth' });
+                    setActiveAdminNav('top');
+                }
+            });
+        });
+        const adminNavObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) setActiveAdminNav(entry.target.id);
+            });
+        }, { root: mainContent, threshold: 0.15, rootMargin: '-8% 0px -65% 0px' });
+        ['moderasiSection', 'adminMap'].forEach(id => {
+            const target = document.getElementById(id);
+            if (target) adminNavObserver.observe(target);
+        });
+        mainContent?.addEventListener('scroll', () => {
+            if (mainContent.scrollTop < 120) setActiveAdminNav('top');
+        }, { passive: true });
 
         // Inisialisasi awal
         loadAdminProfile();
