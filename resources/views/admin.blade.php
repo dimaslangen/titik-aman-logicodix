@@ -110,11 +110,26 @@
         .icon-box {
             width: 42px;
             height: 42px;
+            min-width: 42px;
+            aspect-ratio: 1 / 1;
+            flex: 0 0 auto;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+        .ta-circle {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            flex-shrink: 0;
+            aspect-ratio: 1 / 1;
+            border-radius: 50% !important;
+        }
+        .ta-circle-36 { width: 36px !important; height: 36px !important; min-width: 36px; }
+        .ta-circle-40 { width: 40px !important; height: 40px !important; min-width: 40px; }
+        .patrol-heatmap-card { scroll-margin-top: 20px; }
         .map-heatmap-container {
             height: 380px;
             border-radius: 16px;
@@ -164,7 +179,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#adminMap" class="nav-link py-2 px-3" data-admin-nav-target="adminMap">
+                        <a href="#patrolHeatmapCard" class="nav-link py-2 px-3" data-admin-nav-target="patrolHeatmapCard">
                             <i class="bi bi-activity me-2"></i> Patrol Heatmap
                         </a>
                     </li>
@@ -212,7 +227,7 @@
                 <div class="px-2 pt-3 border-top">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" style="width: 35px; height: 35px; font-size: 12px;" id="adminAvatar">
+                            <div class="bg-success text-white rounded-circle ta-circle ta-circle-36 d-flex align-items-center justify-content-center fw-bold me-2" style="font-size: 12px;" id="adminAvatar">
                                 AD
                             </div>
                             <div style="font-size: 12px; max-width: 110px; overflow: hidden;">
@@ -220,7 +235,7 @@
                                 <small class="text-muted d-block text-truncate" style="font-size: 10px;" id="adminEmail">admin@titikaman.id</small>
                             </div>
                         </div>
-                        <button type="button" id="adminLogoutBtn" class="btn btn-outline-danger btn-sm p-1 rounded-circle" onclick="adminLogout()" title="Keluar">
+                        <button type="button" id="adminLogoutBtn" class="btn btn-outline-danger btn-sm p-1 rounded-circle ta-circle ta-circle-36" onclick="adminLogout()" title="Keluar">
                             <i class="bi bi-box-arrow-right"></i>
                         </button>
                     </div>
@@ -312,7 +327,7 @@
                 <!-- MAIN SECTION: HEATMAP PETA & LIVE FEED -->
                 <div class="row g-3 mb-4">
                     <div class="col-lg-8">
-                        <div class="bg-white p-3 rounded-4 border shadow-sm h-100">
+                        <div id="patrolHeatmapCard" class="bg-white p-3 rounded-4 border shadow-sm h-100 patrol-heatmap-card">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
                                     <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">INTENSITAS LAPORAN LAPANGAN</small>
@@ -690,7 +705,7 @@
                 const isOpen = sos.status === 'open';
                 html += `
                     <div class="live-feed-item d-flex align-items-start gap-3">
-                        <div class="bg-danger-subtle text-danger p-2 rounded-circle mt-1">
+                        <div class="bg-danger-subtle text-danger p-2 rounded-circle ta-circle ta-circle-40 mt-1">
                             <i class="bi bi-exclamation-octagon-fill"></i>
                         </div>
                         <div class="flex-grow-1">
@@ -716,7 +731,7 @@
                 
                 html += `
                     <div class="live-feed-item d-flex align-items-start gap-3">
-                        <div class="${bgClass} p-2 rounded-circle mt-1">
+                        <div class="${bgClass} p-2 rounded-circle ta-circle ta-circle-40 mt-1">
                             <i class="bi ${iconClass}"></i>
                         </div>
                         <div class="flex-grow-1">
@@ -1008,7 +1023,7 @@
                 if (entry.isIntersecting) setActiveAdminNav(entry.target.id);
             });
         }, { root: mainContent, threshold: 0.15, rootMargin: '-8% 0px -65% 0px' });
-        ['moderasiSection', 'adminMap'].forEach(id => {
+        ['moderasiSection', 'patrolHeatmapCard'].forEach(id => {
             const target = document.getElementById(id);
             if (target) adminNavObserver.observe(target);
         });

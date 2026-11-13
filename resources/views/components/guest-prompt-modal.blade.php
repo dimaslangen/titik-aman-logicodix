@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
             <div class="modal-body text-center p-4">
-                <div class="bg-success-subtle text-success d-inline-flex p-3 rounded-circle mb-3">
+                <div class="bg-success-subtle text-success d-inline-flex p-3 rounded-circle ta-circle ta-circle-64 mb-3">
                     <i class="bi bi-shield-lock-fill fs-1"></i>
                 </div>
                 <h5 class="fw-bold text-dark mb-2" id="guestPromptTitle">Masuk untuk Melaporkan</h5>

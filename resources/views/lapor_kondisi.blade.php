@@ -47,7 +47,7 @@
         <!-- 2. Ambil Foto Kondisi (Kamera Langsung & Switch Depan/Belakang) -->
         <div class="mb-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <label class="form-label fw-bold text-dark small mb-0"><span class="badge bg-dark rounded-circle me-1">1</span> Ambil Foto Kondisi</label>
+                <label class="form-label fw-bold text-dark small mb-0"><span class="badge bg-dark rounded-circle ta-circle ta-circle-24 me-1">1</span> Ambil Foto Kondisi</label>
                 <!-- Tombol Ganti Kamera (Depan/Belakang) -->
                 <button type="button" id="btnSwitchKamera" class="btn btn-outline-secondary btn-sm rounded-pill d-none" onclick="gantiKamera()">
                     <i class="bi bi-camera-recess me-1"></i> Ganti Kamera
@@ -58,7 +58,7 @@
             <!-- Kotak Utama Kamera / Tombol Buka -->
             <div id="wrapperBukaKamera" class="camera-box p-5 text-center position-relative" onclick="nyalakanKamera()">
                 <div class="py-4">
-                    <div class="bg-success text-white rounded-circle d-inline-flex p-3 mb-2 shadow-sm">
+                    <div class="bg-success text-white rounded-circle ta-circle ta-circle-56 d-inline-flex p-3 mb-2 shadow-sm">
                         <i class="bi bi-camera-fill fs-3"></i>
                     </div>
                     <h6 class="fw-bold text-dark mb-1">Nyalakan Kamera Langsung</h6>
@@ -113,7 +113,7 @@
                     </select>
                 </div>
             </div>
-            <label for="deskripsiLaporan" class="form-label fw-bold text-dark small"><span class="badge bg-dark rounded-circle me-1">2</span> Keterangan Kondisi</label>
+            <label for="deskripsiLaporan" class="form-label fw-bold text-dark small"><span class="badge bg-dark rounded-circle ta-circle ta-circle-24 me-1">2</span> Keterangan Kondisi</label>
             <textarea class="form-control rounded-3" id="deskripsiLaporan" rows="3" placeholder="Contoh: Lampu penerangan jalan mati total, jalan gelap dan rawan..." required></textarea>
         </div>
 

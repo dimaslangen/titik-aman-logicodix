@@ -65,7 +65,7 @@
     <!-- Banner Khusus Live Companion (Jika dibuka dari tautan terbagi) -->
     <div id="sharedRouteBanner" class="alert alert-success d-none align-items-center justify-content-between p-3 rounded-4 shadow-sm mb-3">
         <div class="d-flex align-items-center">
-            <div class="bg-success text-white p-2 rounded-circle me-3">
+            <div class="bg-success text-white p-2 rounded-circle ta-circle ta-circle-40 me-3">
                 <i class="bi bi-broadcast fs-5"></i>
             </div>
             <div>
@@ -101,17 +101,17 @@
                         <option value="unesa-ketintang">UNESA Ketintang, Surabaya</option>
                         <option value="rawamangun">Rawamangun, Jakarta Timur</option>
                     </select>
-                    <button type="button" class="btn btn-light btn-sm rounded-circle flex-shrink-0" id="useCurrentLocation" title="Gunakan lokasi saya" aria-label="Gunakan lokasi saya"><i class="bi bi-crosshair"></i></button>
+                    <button type="button" class="btn btn-light btn-sm rounded-circle ta-circle ta-circle-38 flex-shrink-0" id="useCurrentLocation" title="Gunakan lokasi saya" aria-label="Gunakan lokasi saya"><i class="bi bi-crosshair"></i></button>
                 </div>
                 <div class="route-search-row d-flex align-items-center gap-2 border rounded-3 px-3 py-2">
                     <i class="bi bi-geo-alt-fill text-danger route-icon"></i>
                     <input type="search" class="form-control form-control-sm border-0 shadow-none p-0" id="destinationSearch" placeholder="Cari tujuan, misalnya UNJ atau RS Persahabatan" autocomplete="off">
-                    <button type="button" class="btn btn-light btn-sm rounded-circle flex-shrink-0" id="searchDestination" title="Cari tujuan" aria-label="Cari tujuan"><i class="bi bi-search"></i></button>
+                    <button type="button" class="btn btn-light btn-sm rounded-circle ta-circle ta-circle-38 flex-shrink-0" id="searchDestination" title="Cari tujuan" aria-label="Cari tujuan"><i class="bi bi-search"></i></button>
                     <div id="destinationSuggestions" class="route-suggestions bg-white border rounded-3 shadow-sm d-none"></div>
                 </div>
                 <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i> Klik peta untuk memilih titik tujuan.</small>
             </div>
-            <button type="button" class="btn btn-outline-secondary rounded-circle flex-shrink-0" id="swapRoutePoints" title="Tukar asal dan tujuan" aria-label="Tukar asal dan tujuan">⇅</button>
+            <button type="button" class="btn btn-outline-secondary rounded-circle ta-circle ta-circle-40 flex-shrink-0" id="swapRoutePoints" title="Tukar asal dan tujuan" aria-label="Tukar asal dan tujuan">⇅</button>
         </div>
         <input type="hidden" id="originLat">
         <input type="hidden" id="originLng">

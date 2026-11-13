@@ -62,6 +62,21 @@
             .ta-main { padding-left: .75rem; padding-right: .75rem; }
         }
         .leaflet-container { z-index: 0; }
+        .rounded-circle { flex-shrink: 0; aspect-ratio: 1 / 1; }
+        .ta-circle {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            flex-shrink: 0;
+            aspect-ratio: 1 / 1;
+            border-radius: 50% !important;
+        }
+        .ta-circle-24 { width: 24px !important; height: 24px !important; min-width: 24px; }
+        .ta-circle-38 { width: 38px !important; height: 38px !important; min-width: 38px; }
+        .ta-circle-40 { width: 40px !important; height: 40px !important; min-width: 40px; }
+        .ta-circle-56 { width: 56px !important; height: 56px !important; min-width: 56px; }
+        .ta-circle-64 { width: 64px !important; height: 64px !important; min-width: 64px; }
     </style>
     @stack('styles')
 </head>
@@ -129,7 +144,7 @@
                     container.innerHTML = `
                         <div class="dropdown">
                             <button class="btn btn-sm btn-light rounded-pill px-3 py-1 d-flex align-items-center gap-2 border shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <span class="rounded-circle bg-success text-white d-inline-flex justify-content-center align-items-center fw-bold" style="width: 24px; height: 24px; font-size: 11px;">${initial}</span>
+                                <span class="rounded-circle ta-circle ta-circle-24 bg-success text-white d-inline-flex justify-content-center align-items-center fw-bold" style="font-size: 11px;">${initial}</span>
                                 <span class="fw-semibold text-dark small">${escapeHtml(user.name)}</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">

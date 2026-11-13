@@ -39,7 +39,7 @@
     <!-- Info Banner -->
     <div class="alert alert-info border-0 rounded-4 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center">
-            <div class="bg-primary text-white p-2 rounded-circle me-3">
+            <div class="bg-primary text-white p-2 rounded-circle ta-circle ta-circle-40 me-3">
                 <i class="bi bi-shield-shaded fs-5"></i>
             </div>
             <div>
