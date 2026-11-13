@@ -8,6 +8,5 @@ class UserSeeder extends Seeder {
         User::updateOrCreate(['email'=>'warga@titikaman.id'], ['name'=>'Warga Demo','password'=>Hash::make('Warga123!'),'role'=>'user']);
         User::updateOrCreate(['email'=>'warga2@titikaman.id'], ['name'=>'Warga Demo 2','password'=>Hash::make('Warga123!'),'role'=>'user']);
         User::updateOrCreate(['email'=>'warga3@titikaman.id'], ['name'=>'Warga Demo 3','password'=>Hash::make('Warga123!'),'role'=>'user']);
-        User::updateOrCreate(['email'=>'rafa@gmail.com'], ['name'=>'Rafa Valian Putra Annaffi','password'=>Hash::make('rafa123'),'role'=>'user']);
     }
 }
