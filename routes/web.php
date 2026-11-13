@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn()=> redirect('/app'));
 Route::get('/admin/login', fn()=> redirect('/masuk'));
+Route::get('/tentang', fn () => view('welcome'))->name('tentang');
 
 Route::get('/masuk', fn() => view('auth'));
 Route::get('/daftar', fn() => view('auth'));
