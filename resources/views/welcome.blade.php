@@ -8,7 +8,8 @@
     <meta property="og:description" content="Navigasi komunitas untuk perjalanan yang lebih aman.">
     <meta property="og:image" content="{{ asset('images/TitikAman.png') }}">
     <meta property="og:type" content="website">
-    <link rel="icon" type="image/png" href="{{ asset('images/TitikAman(no-teks).png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/TitikAmanSvg(no-teks).png') }}?v=3">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/TitikAmanSvg(no-teks).png') }}?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">

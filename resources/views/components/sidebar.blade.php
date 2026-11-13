@@ -8,13 +8,13 @@
     );
 @endphp
 
-<aside id="taCivicSidebar" class="ta-sidebar" aria-label="Navigasi utama">
+<aside id="taCivicSidebar" class="ta-sidebar overflow-x-hidden" aria-label="Navigasi utama">
     <div class="d-flex align-items-start justify-content-between gap-2 mb-4">
         <div>
             <x-brand-logo theme="light" size="md" />
             <small class="text-uppercase text-muted fw-bold d-block mt-2" style="font-size: 10px; letter-spacing: .12em;">Civic Safety Grid</small>
         </div>
-        <button type="button" class="ta-sidebar-close btn btn-light d-lg-none rounded-circle ta-circle ta-circle-40" onclick="window.taToggleSidebar(false)" aria-label="Tutup menu navigasi">
+        <button type="button" class="ta-sidebar-close sidebar-close-btn btn btn-light d-lg-none lg:hidden rounded-circle ta-circle ta-circle-40" onclick="window.taToggleSidebar(false)" aria-label="Tutup menu navigasi">
             <i class="bi bi-x-lg"></i>
         </button>
     </div>

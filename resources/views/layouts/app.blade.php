@@ -6,7 +6,8 @@
     <meta name="theme-color" content="#11653A">
     <title>@yield('title', 'TitikAman - Civic Safety Grid')</title>
 
-    <link rel="icon" type="image/png" href="{{ asset('images/TitikAman(no-teks).png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/TitikAmanSvg(no-teks).png') }}?v=3">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/TitikAmanSvg(no-teks).png') }}?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -51,6 +52,7 @@
             display: flex;
             flex-direction: column;
             left: 0;
+            overflow-x: hidden;
             overflow-y: auto;
             padding: 1.25rem;
             position: fixed;
@@ -161,6 +163,12 @@
             min-height: 38px !important;
             height: auto !important;
         }
+        @media (min-width: 992px) {
+            .ta-sidebar-close,
+            .sidebar-close-btn {
+                display: none !important;
+            }
+        }
     </style>
     @stack('styles')
 </head>
@@ -222,14 +230,14 @@
                 containers.forEach(container => {
                     container.innerHTML = `
                         <div class="d-flex align-items-center gap-2">
-                            <span class="ta-circle ta-circle-40 bg-light text-secondary">
+                            <span class="ta-circle ta-circle-40 flex-shrink-0 bg-light text-secondary">
                                 <i class="bi bi-person"></i>
                             </span>
-                            <div class="min-width-0 flex-grow-1">
+                            <div class="min-width-0 flex-grow-1" style="flex: 1 1 0%; min-width: 0;">
                                 <span class="fw-semibold text-dark small d-block text-truncate">Mode Tamu</span>
                                 <small class="text-muted d-block text-truncate">Belum masuk</small>
                             </div>
-                            <a href="/masuk" class="btn btn-sm btn-outline-success rounded-pill px-2 fw-semibold">Masuk</a>
+                            <a href="/masuk" class="btn btn-sm btn-outline-success flex-shrink-0 rounded-pill px-2 fw-semibold">Masuk</a>
                         </div>`;
                 });
                 return;
@@ -250,12 +258,12 @@
                 containers.forEach(container => {
                     container.innerHTML = `
                         <div class="d-flex align-items-center gap-2">
-                            <span class="ta-circle ta-circle-40 bg-success text-white fw-bold" style="font-size: 12px;">${initial}</span>
-                            <div class="min-width-0 flex-grow-1">
+                            <span class="ta-circle ta-circle-40 flex-shrink-0 bg-success text-white fw-bold" style="font-size: 12px;">${initial}</span>
+                            <div class="min-width-0 flex-grow-1" style="flex: 1 1 0%; min-width: 0;">
                                 <span class="fw-semibold text-dark small d-block text-truncate">${escapeHtml(user.name)}</span>
                                 <small class="text-muted d-block text-truncate">Warga Terverifikasi</small>
                             </div>
-                            <button type="button" class="btn btn-sm btn-danger-subtle text-danger rounded-circle ta-circle ta-circle-38" onclick="window.taLogout()" aria-label="Keluar">
+                            <button type="button" class="btn btn-sm btn-danger-subtle text-danger flex-shrink-0 rounded-circle ta-circle ta-circle-38" onclick="window.taLogout()" aria-label="Keluar">
                                 <i class="bi bi-box-arrow-right"></i>
                             </button>
                         </div>`;
@@ -265,12 +273,12 @@
                 containers.forEach(container => {
                     container.innerHTML = `
                         <div class="d-flex align-items-center gap-2">
-                            <span class="ta-circle ta-circle-40 bg-light text-secondary"><i class="bi bi-person"></i></span>
-                            <div class="min-width-0 flex-grow-1">
+                            <span class="ta-circle ta-circle-40 flex-shrink-0 bg-light text-secondary"><i class="bi bi-person"></i></span>
+                            <div class="min-width-0 flex-grow-1" style="flex: 1 1 0%; min-width: 0;">
                                 <span class="fw-semibold text-dark small d-block text-truncate">Mode Tamu</span>
                                 <small class="text-muted d-block text-truncate">Belum masuk</small>
                             </div>
-                            <a href="/masuk" class="btn btn-sm btn-outline-success rounded-pill px-2 fw-semibold">Masuk</a>
+                            <a href="/masuk" class="btn btn-sm btn-outline-success flex-shrink-0 rounded-pill px-2 fw-semibold">Masuk</a>
                         </div>`;
                 });
             }

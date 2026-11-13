@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/png" href="{{ asset('images/TitikAman(no-teks).png') }}">
+<link rel="icon" type="image/png" href="{{ asset('images/TitikAmanSvg(no-teks).png') }}?v=3">
+<link rel="shortcut icon" type="image/png" href="{{ asset('images/TitikAmanSvg(no-teks).png') }}?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,10 +13,11 @@
 :root{--navy:#f8fafc;--navy2:#11653a;--green:#15803d;--blue:#15803d;--mute:#64748b;--line:#e2e8f0}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;font-family:"Plus Jakarta Sans","Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:#0f172a;background:#fff}
-.side{background:#f8fafc;border-right:1px solid var(--line);padding:40px;display:flex;flex-direction:column;justify-content:space-between}
+.side{background-color:#0B1220;background-image:linear-gradient(160deg,#0B1220 0%,#0F172A 55%,#112A24 100%),linear-gradient(rgba(148,163,184,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.08) 1px,transparent 1px);background-size:auto,32px 32px,32px 32px;background-blend-mode:normal,normal,normal;border-right:1px solid #1e293b;padding:40px;display:flex;flex-direction:column;justify-content:space-between}
 .brand{display:inline-flex;align-items:center;text-decoration:none;color:#0f172a}
-.side h2{font-size:30px;line-height:1.2;margin:0 0 10px;color:#0f172a}.side p{color:#475569;margin:0;max-width:380px}
-.side small{color:var(--mute);font-size:12px;max-width:380px}
+.side .brand > div > span{color:#10B981 !important}.side .brand > div > span strong{color:#FFFFFF !important}
+.side h2{font-size:30px;line-height:1.2;margin:0 0 10px;color:#F8FAFC}.side p{color:#94A3B8;margin:0;max-width:380px}
+.side small{color:#64748B;font-size:12px;max-width:380px}
 .main{display:flex;align-items:center;justify-content:center;padding:32px}
 .box{width:100%;max-width:380px}
 .tabs{display:grid;grid-template-columns:1fr 1fr;background:#f1f5f9;border-radius:10px;padding:4px;margin-bottom:22px}
@@ -47,8 +49,8 @@ input:focus-visible{border-color:#15803d;box-shadow:0 0 0 3px rgba(21,128,61,.15
   <form id="f" novalidate>
     <div id="g-name" hidden><label for="name">Nama</label><input class="field" id="name" autocomplete="name"></div>
     <label for="email">Email</label><input class="field" id="email" type="email" autocomplete="email" required>
-    <label for="pass">Kata sandi</label><input class="field" id="pass" type="password" autocomplete="current-password" required>
-    <div id="g-pass2" hidden><label for="pass2">Ulangi kata sandi</label><input class="field" id="pass2" type="password" autocomplete="new-password"></div>
+    <label for="pass">Kata sandi</label><div style="position: relative;"><input class="field" id="pass" type="password" autocomplete="current-password" required style="padding-right: 2.75rem;"><button type="button" class="toggle-password-btn" aria-label="Tampilkan atau sembunyikan kata sandi" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #64748B; cursor: pointer; display: flex; align-items: center; padding: 4px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div id="g-pass2" hidden><label for="pass2">Ulangi kata sandi</label><div style="position: relative;"><input class="field" id="pass2" type="password" autocomplete="new-password" style="padding-right: 2.75rem;"><button type="button" class="toggle-password-btn" aria-label="Tampilkan atau sembunyikan kata sandi" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #64748B; cursor: pointer; display: flex; align-items: center; padding: 4px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <p class="err" id="err" role="alert"></p>
     <button class="btn" id="go" type="submit">Masuk</button>
   </form>
@@ -88,6 +90,18 @@ $('f').onsubmit=async e=>{
   }catch(err){$('err').textContent=err.message}
   finally{$('go').disabled=false}
 };
+</script>
+<script>
+const eyeOpen='<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0Z"/><circle cx="12" cy="12" r="3"/>';
+const eyeClosed='<path d="m3 3 18 18"/><path d="M10.58 10.58a2 2 0 0 0 2.83 2.83"/><path d="M9.88 4.24A10.75 10.75 0 0 1 12 4c5 0 8.27 4.17 9.5 6a1 1 0 0 1 0 1.99 16.7 16.7 0 0 1-3.1 3.64M6.61 6.61A16.7 16.7 0 0 0 2.5 10a1 1 0 0 0 0 1.99c.7 1.04 1.96 2.73 3.9 3.92A10.75 10.75 0 0 0 12 18c1.1 0 2.13-.2 3.07-.56"/>';
+document.querySelectorAll('.toggle-password-btn').forEach(button=>{
+  const input=button.parentElement.querySelector('input');
+  button.addEventListener('click',()=>{
+    const visible=input.type==='password';
+    input.type=visible?'text':'password';
+    button.querySelector('svg').innerHTML=visible?eyeClosed:eyeOpen;
+  });
+});
 </script>
 </body>
 </html>
