@@ -116,8 +116,8 @@ Satu laporan, format sama seperti di atas.
 {"success":true,"data":{
   "region":"rawamangun","mode":"motor","source":"osrm",
   "disclaimer":"SafePass adalah alat bantu informasi berbasis komunitas, bukan jaminan keselamatan absolut, dan tidak menggantikan layanan darurat resmi (hubungi 110).",
-  "fastest":{"duration":202,"distance":1717,"geometry":{"type":"LineString","coordinates":[[106.9,-6.19],...]},"penalty_seconds":300,"bonus_seconds":120,"score_seconds":382,"avoided_reports":[],"hubs_passed":[...]},
-  "safepass":{"duration":202,"distance":1717,"geometry":{"type":"LineString","coordinates":[[...]]},"penalty_seconds":300,"bonus_seconds":120,"score_seconds":382,"avoided_reports":[{"report_id":1,"category":"penerangan_padam","distance_m":21.2}],"hubs_passed":[{"hub_id":1,"name":"Pos Polisi Rawamangun","type":"polisi","distance_m":45.0}]},
+  "fastest":{"duration":202,"distance":1717,"geometry":{"type":"LineString","coordinates":[[106.9,-6.19],...]},"risk_count":0,"risk_reports":[],"safe_percentage":100,"hub_count":1,"hubs_passed":[...]},
+  "safepass":{"duration":236,"distance":1980,"geometry":{"type":"LineString","coordinates":[[...]]},"risk_count":0,"risk_reports":[],"safe_percentage":100,"hub_count":2,"hubs_passed":[{"hub_id":1,"name":"Pos Polisi Rawamangun","type":"polisi","distance_m":45.0}]},
   "note":"Rute kandidat dari OSRM publik (router.project-osrm.org), pembobotan SafePass dihitung di Laravel."
 }}
 ```
@@ -125,10 +125,14 @@ Penjelasan field:
 - `geometry.coordinates`: GeoJSON `[[lng, lat], ...]` — langsung bisa digambar di Leaflet
   (`L.polyline(coords.map(c => [c[1], c[0]]))`). SafePass = hijau tebal, Tercepat = kuning putus-putus.
 - `duration`: detik (OSRM), `distance`: meter.
-- `score_seconds = duration + penalty - bonus`. `fastest` = durasi terkecil,
-  `safepass` = skor terkecil. Kalau tidak ada laporan `VERIFIED`, keduanya sama.
-- Penalti: laporan `VERIFIED` ≤ 50 m dari rute → +300 detik (penerangan/area sepi),
-  +180 detik (hambatan). Bonus: Safety Hub ≤ 100 m → −60 detik/hub, maks −300 detik.
+- `risk_count` menghitung semua laporan aktif dalam radius 120 m dari geometri rute.
+  `fastest` selalu berasal dari rute langsung OSRM tanpa pembobotan bahaya.
+  `safepass` memprioritaskan `risk_count` terendah, lalu Safety Hub terbanyak, lalu durasi.
+- Jika kandidat OSRM hanya satu atau rute tercepat melewati bahaya, SafePass meminta
+  geometri baru melalui waypoint Safety Hub (atau waypoint pergeseran aman 150–250 m).
+  Kedua geometri dikembalikan berbeda agar dapat dibandingkan bersamaan di peta.
+- `safe_percentage` adalah indikator ringkas jalur aman/terang berdasarkan jumlah laporan aktif;
+  ini bukan jaminan keselamatan.
 - `source`: `"osrm"` (asli) atau `"stub"` (OSRM tidak terjangkau — rute garis lurus +
   offset, **bukan** jalan asli; tampilkan catatan ini di UI demo kalau muncul).
 - Di luar bbox → `422` "Asal / tujuan di luar bounding box region …".

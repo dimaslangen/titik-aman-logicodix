@@ -12,9 +12,10 @@
     }
     .route-option-card {
         border: 2px solid #e2e8f0;
-        transition: all 0.2s;
+        transition: all 0.3s ease, opacity 0.3s ease;
         cursor: pointer;
     }
+    .route-option-card.route-not-selected { opacity: 0.55; }
     .route-option-card:hover {
         border-color: #0d9488;
         background-color: #f0fdfa;
@@ -143,7 +144,7 @@
         <input type="hidden" id="originLng">
         <input type="hidden" id="destinationLat">
         <input type="hidden" id="destinationLng">
-        <input type="hidden" id="routeMode" value="motor">
+        <input type="hidden" id="routeMode" value="motorcycle">
     </div>
 
     <!-- Area Peta Leaflet Komparasi Rute -->
@@ -154,9 +155,9 @@
     <!-- Panel Bawah: Pilihan Rute Perjalanan -->
     <div class="bg-white p-4 rounded-4 shadow-sm">
         <div class="route-mode-tabs mb-3" role="group" aria-label="Moda transportasi">
-            <button type="button" class="btn btn-sm btn-outline-success mode-tab rounded-pill px-2" data-mode="mobil"><i class="bi bi-car-front-fill me-1"></i>Mobil</button>
-            <button type="button" class="btn btn-sm btn-success mode-tab active rounded-pill px-2" data-mode="motor"><i class="bi bi-bicycle me-1"></i>Motor</button>
-            <button type="button" class="btn btn-sm btn-outline-success mode-tab rounded-pill px-2" data-mode="jalan_kaki"><i class="bi bi-person-walking me-1"></i>Jalan kaki</button>
+            <button type="button" class="btn btn-sm btn-outline-success mode-tab rounded-pill px-2" data-mode="car"><i class="bi bi-car-front-fill me-1"></i>Mobil</button>
+            <button type="button" class="btn btn-sm btn-success mode-tab active rounded-pill px-2" data-mode="motorcycle"><i class="bi bi-bicycle me-1"></i>Motor</button>
+            <button type="button" class="btn btn-sm btn-outline-success mode-tab rounded-pill px-2" data-mode="foot"><i class="bi bi-person-walking me-1"></i>Jalan kaki</button>
         </div>
         <div class="mb-3">
             <button type="button" class="btn btn-success w-100 py-2 fw-bold shadow-sm" id="compareRoutesButton">
@@ -264,6 +265,8 @@
     const routeLayer = L.layerGroup().addTo(mapRute);
     const markersLayer = L.layerGroup().addTo(mapRute);
     const selectionLayer = L.layerGroup().addTo(mapRute);
+    const dangerMarkersLayer = L.layerGroup().addTo(mapRute);
+    const hubMarkersLayer = L.layerGroup().addTo(mapRute);
 
     let routeRegions = {};
     let lastRouteRequest = null;
@@ -271,6 +274,10 @@
     let shareModalInstance = null;
     let originMarker = null;
     let destinationMarker = null;
+    let selectedMode = 'motorcycle';
+    let chosenRoute = null;
+    let routeLines = {safe: null, fastest: null};
+    let compareRequestId = 0;
 
     const $route = id => document.getElementById(id);
     const showRouteStatus = (message, type = 'danger') => {
@@ -284,6 +291,11 @@
     };
     const formatDuration = seconds => `${Math.round(Number(seconds || 0) / 60)} menit`;
     const formatDistance = meters => `${(Number(meters || 0) / 1000).toFixed(2)} km`;
+    const normalizeMode = mode => ({
+        mobil: 'car', car: 'car',
+        motor: 'motorcycle', motorcycle: 'motorcycle',
+        jalan_kaki: 'foot', foot: 'foot'
+    }[mode] || 'motorcycle');
     const toLeafletCoordinates = route => (route?.geometry?.coordinates || [])
         .filter(coordinate => Array.isArray(coordinate) && coordinate.length >= 2)
         .map(coordinate => [coordinate[1], coordinate[0]]);
@@ -298,6 +310,66 @@
 
     function currentRegion() {
         return routeRegions[$route('pilihanAsal').value];
+    }
+
+    function reportMarkerColor(category) {
+        return category === 'penerangan_padam' ? '#F59E0B' : '#DC2626';
+    }
+
+    async function loadRouteMapMarkers(regionSlug) {
+        dangerMarkersLayer.clearLayers();
+        hubMarkersLayer.clearLayers();
+
+        const [reportsResponse, hubsResponse] = await Promise.all([
+            fetch(`${routeApi}/reports?region_slug=${encodeURIComponent(regionSlug)}&per_page=100`, {
+                headers: {Accept: 'application/json'}
+            }),
+            fetch(`${routeApi}/safety-hubs?region_slug=${encodeURIComponent(regionSlug)}`, {
+                headers: {Accept: 'application/json'}
+            })
+        ]);
+        if (!reportsResponse.ok || !hubsResponse.ok) {
+            throw new Error('Data laporan bahaya atau Safety Hub gagal dimuat.');
+        }
+
+        const reportsPayload = await reportsResponse.json();
+        const hubsPayload = await hubsResponse.json();
+        const reports = Array.isArray(reportsPayload.data) ? reportsPayload.data : [];
+        const hubs = Array.isArray(hubsPayload.data) ? hubsPayload.data : [];
+
+        reports
+            .filter(report => report.status === 'VERIFIED')
+            .forEach(report => {
+                const popupContent = `
+                    <div style="min-width: 190px;">
+                        <strong>${escapeHtml(report.label || report.category)}</strong>
+                        <span class="badge bg-success ms-1">VERIFIED</span>
+                        <p class="small text-muted mb-0 mt-2">${escapeHtml(report.description || 'Tidak ada keterangan tambahan.')}</p>
+                    </div>
+                `;
+                L.circleMarker([Number(report.lat), Number(report.lng)], {
+                    radius: 7,
+                    color: '#fff',
+                    weight: 2,
+                    fillColor: reportMarkerColor(report.category),
+                    fillOpacity: 0.95,
+                    interactive: true,
+                    bubblingMouseEvents: false
+                }).bindPopup(popupContent).addTo(dangerMarkersLayer);
+            });
+
+        hubs.forEach(hub => {
+            L.circleMarker([Number(hub.lat), Number(hub.lng)], {
+                radius: 7,
+                color: '#fff',
+                weight: 2,
+                fillColor: '#2563EB',
+                fillOpacity: 0.95,
+                interactive: true,
+                bubblingMouseEvents: false
+            }).bindPopup(`<strong>${escapeHtml(hub.name)}</strong><br>Safety Hub · ${escapeHtml(hub.type)}`)
+                .addTo(hubMarkersLayer);
+        });
     }
 
     function updateOriginLabel(label) {
@@ -326,11 +398,13 @@
         }
     }
 
-    function setDestinationPoint(lat, lng, address = '') {
+    function setDestinationPoint(lat, lng, address = '', compare = false) {
+        resetRouteSelection();
         $route('destinationLat').value = Number(lat).toFixed(5);
         $route('destinationLng').value = Number(lng).toFixed(5);
         if (address) $route('destinationSearch').value = address;
         renderSelectionMarkers();
+        if (compare && Number.isFinite(Number($route('originLat').value))) compareRoutes();
     }
 
     function regionViewbox() {
@@ -360,7 +434,7 @@
             button.className = 'btn btn-light text-start w-100 border-0 rounded-0 small';
             button.textContent = result.display_name;
             button.addEventListener('click', () => {
-                setDestinationPoint(result.lat, result.lon, result.display_name);
+                setDestinationPoint(result.lat, result.lon, result.display_name, true);
                 mapRute.flyTo([Number(result.lat), Number(result.lon)], 16);
                 container.classList.add('d-none');
             });
@@ -388,9 +462,9 @@
         }
 
         const first = results[0];
-        setDestinationPoint(first.lat, first.lon, first.display_name);
+        setDestinationPoint(first.lat, first.lon, first.display_name, true);
         mapRute.flyTo([Number(first.lat), Number(first.lon)], 16);
-        showRouteStatus('Tujuan ditemukan. Klik "Cari & Bandingkan Rute".', 'success');
+        showRouteStatus('Tujuan ditemukan. Komparasi rute sedang dihitung.', 'success');
     }
 
     function setRegionDefaults() {
@@ -407,21 +481,27 @@
     function drawRoute(data) {
         routeLayer.clearLayers();
         markersLayer.clearLayers();
+        routeLines = {safe: null, fastest: null};
+        resetRouteSelection();
 
         const safe = toLeafletCoordinates(data.safepass);
         const fastest = toLeafletCoordinates(data.fastest);
         const points = [...safe, ...fastest];
 
         if (fastest.length) {
-            L.polyline(fastest, {
-                color: '#eab308', weight: 5, dashArray: '10 8', opacity: 0.9
-            }).bindPopup(`<strong>Rute Tercepat</strong><br>Durasi: ${formatDuration(data.fastest?.duration)} · ${formatDistance(data.fastest?.distance)}`).addTo(routeLayer);
+            routeLines.fastest = L.polyline(fastest, {
+                color: '#F59E0B', weight: 8, opacity: 0.65, dashArray: null
+            }).bindTooltip('Tercepat', {permanent: true, direction: 'center', className: 'bg-warning text-dark border-0 rounded-pill px-2'})
+                .bindPopup(`<strong>Rute Tercepat</strong><br>Durasi: ${formatDuration(data.fastest?.duration)} · ${formatDistance(data.fastest?.distance)}`)
+                .addTo(routeLayer);
         }
 
         if (safe.length) {
-            L.polyline(safe, {
-                color: '#16a34a', weight: 8, opacity: 0.95
-            }).bindPopup(`<strong>Rute SafePass (Rekomendasi)</strong><br>Durasi: ${formatDuration(data.safepass?.duration)} · ${formatDistance(data.safepass?.distance)}`).addTo(routeLayer);
+            routeLines.safe = L.polyline(safe, {
+                color: '#11653A', weight: 4, opacity: 0.95, dashArray: '10, 6'
+            }).bindTooltip('SafePass', {permanent: true, direction: 'center', className: 'bg-success text-white border-0 rounded-pill px-2'})
+                .bindPopup(`<strong>Rute SafePass (Rekomendasi)</strong><br>Durasi: ${formatDuration(data.safepass?.duration)} · ${formatDistance(data.safepass?.distance)}`)
+                .addTo(routeLayer);
         }
 
         if (points.length) {
@@ -450,19 +530,60 @@
     }
 
     function routeSummary(route) {
-        const avoided = (route?.avoided_reports || []).length;
-        const hubs = (route?.hubs_passed || []).length;
-        return `${formatDistance(route?.distance)} · ${avoided} titik bahaya dihindari · ${hubs} Safety Hub dilewati`;
+        const risks = Number(route?.risk_count ?? (route?.risk_reports || []).length);
+        const hubs = Number(route?.hub_count ?? (route?.hubs_passed || []).length);
+        const riskText = risks ? `Melewati ${risks} area perlu perhatian` : 'Jalur langsung aman dari titik laporan';
+        return `${formatDistance(route?.distance)} · ${route?.safe_percentage ?? 100}% aman/terang · ${hubs} Safety Hub · ${riskText}`;
+    }
+
+    function updateRouteButtons() {
+        const safeButton = document.querySelector('#cardSafePass button');
+        const fastButton = document.querySelector('#cardTercepat button');
+        if (!safeButton || !fastButton) return;
+        safeButton.innerHTML = chosenRoute === 'safepass'
+            ? 'Rute Aktif Dipilih ✓'
+            : chosenRoute ? 'Ganti ke Rute Ini <i class="bi bi-arrow-right ms-1"></i>' : 'Gunakan Rute Ini <i class="bi bi-arrow-right ms-1"></i>';
+        fastButton.innerHTML = chosenRoute === 'fastest'
+            ? 'Rute Aktif Dipilih ✓'
+            : chosenRoute ? 'Ganti ke Rute Ini <i class="bi bi-arrow-right ms-1"></i>' : 'Gunakan Rute Ini <i class="bi bi-arrow-right ms-1"></i>';
+    }
+
+    function applyRouteSelection(type) {
+        chosenRoute = type;
+        const selectedLine = routeLines[type === 'safepass' ? 'safe' : 'fastest'];
+        const otherLine = routeLines[type === 'safepass' ? 'fastest' : 'safe'];
+        if (selectedLine) selectedLine.setStyle({opacity: 1, weight: 7, dashArray: null});
+        if (otherLine) otherLine.setStyle({opacity: 0.12});
+
+        const safeCard = document.getElementById('cardSafePass');
+        const fastCard = document.getElementById('cardTercepat');
+        safeCard.classList.toggle('selected', type === 'safepass');
+        fastCard.classList.toggle('selected', type === 'fastest');
+        safeCard.classList.toggle('route-not-selected', type !== 'safepass');
+        fastCard.classList.toggle('route-not-selected', type !== 'fastest');
+        updateRouteButtons();
+    }
+
+    function resetRouteSelection() {
+        chosenRoute = null;
+        if (routeLines.safe) routeLines.safe.setStyle({opacity: 0.95, weight: 4, dashArray: '10, 6'});
+        if (routeLines.fastest) routeLines.fastest.setStyle({opacity: 0.65, weight: 8, dashArray: null});
+        const safeCard = document.getElementById('cardSafePass');
+        const fastCard = document.getElementById('cardTercepat');
+        if (safeCard) safeCard.classList.remove('selected', 'route-not-selected');
+        if (fastCard) fastCard.classList.remove('selected', 'route-not-selected');
+        updateRouteButtons();
     }
 
     async function compareRoutes() {
         const button = $route('compareRoutesButton');
+        const requestId = ++compareRequestId;
         const body = {
             origin_lat: Number($route('originLat').value),
             origin_lng: Number($route('originLng').value),
             destination_lat: Number($route('destinationLat').value),
             destination_lng: Number($route('destinationLng').value),
-            mode: $route('routeMode').value,
+            mode: selectedMode,
             region_slug: $route('pilihanAsal').value
         };
 
@@ -485,6 +606,7 @@
             if (!response.ok) {
                 throw new Error(payload.message || 'Rute tidak dapat dihitung. Periksa koordinat dan wilayah.');
             }
+            if (requestId !== compareRequestId) return;
 
             lastRouteRequest = body;
             lastRouteData = payload.data;
@@ -493,7 +615,7 @@
             $route('safeDuration').textContent = formatDuration(payload.data.safepass?.duration);
             $route('fastDuration').textContent = formatDuration(payload.data.fastest?.duration);
             $route('safeDetails').textContent = routeSummary(payload.data.safepass);
-            $route('fastDetails').textContent = `${formatDistance(payload.data.fastest?.distance)} · durasi tercepat tanpa penalti kondisi jalan`;
+            $route('fastDetails').textContent = `${formatDistance(payload.data.fastest?.distance)} · ${payload.data.fastest?.risk_count || 0} titik risiko di jalur`;
             $route('shareRouteButton').disabled = false;
 
             showRouteStatus(payload.data.note || 'Dua opsi rute berhasil dihitung.', 'success');
@@ -528,7 +650,7 @@
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({...lastRouteRequest, route_data: lastRouteData})
+                body: JSON.stringify({...lastRouteRequest, selected_route: chosenRoute, route_data: lastRouteData})
             });
 
             const payload = await response.json().catch(() => ({}));
@@ -579,7 +701,17 @@
                 document.getElementById('sharedRouteExpires').textContent = `Berlaku hingga: ${new Date(shared.expires_at).toLocaleTimeString('id-ID')}`;
             }
 
-            if (shared.region_slug) $route('pilihanAsal').value = shared.region_slug;
+            if (shared.region_slug) {
+                $route('pilihanAsal').value = shared.region_slug;
+                await loadRouteMapMarkers(shared.region_slug);
+            }
+            selectedMode = normalizeMode(shared.mode);
+            $route('routeMode').value = selectedMode;
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.mode === selectedMode);
+                tab.classList.toggle('btn-success', tab.dataset.mode === selectedMode);
+                tab.classList.toggle('btn-outline-success', tab.dataset.mode !== selectedMode);
+            });
             $route('originLat').value = shared.origin_lat;
             $route('originLng').value = shared.origin_lng;
             $route('destinationLat').value = shared.destination_lat;
@@ -593,7 +725,7 @@
                 origin_lng: shared.origin_lng,
                 destination_lat: shared.destination_lat,
                 destination_lng: shared.destination_lng,
-                mode: shared.mode || 'motor',
+                mode: selectedMode,
                 region_slug: shared.region_slug
             };
 
@@ -603,7 +735,8 @@
                 $route('safeDuration').textContent = formatDuration(shared.route_data.safepass?.duration);
                 $route('fastDuration').textContent = formatDuration(shared.route_data.fastest?.duration);
                 $route('safeDetails').textContent = routeSummary(shared.route_data.safepass);
-                $route('fastDetails').textContent = `${formatDistance(shared.route_data.fastest?.distance)} · rute alternatif`;
+                $route('fastDetails').textContent = `${formatDistance(shared.route_data.fastest?.distance)} · ${shared.route_data.fastest?.risk_count || 0} titik risiko di jalur`;
+                if (shared.selected_route) applyRouteSelection(shared.selected_route);
                 showRouteStatus('Menampilkan rute perjalanan yang dibagikan via Live Companion.', 'success');
             } else {
                 compareRoutes();
@@ -620,18 +753,14 @@
             return;
         }
 
-        const cardSafe = document.getElementById('cardSafePass');
-        const cardFast = document.getElementById('cardTercepat');
         const tripPanel = document.getElementById('activeTripPanel');
         const routeName = document.getElementById('activeRouteName');
 
-        if (namaRute === 'SafePass') {
-            cardSafe.classList.add('selected');
-            cardFast.classList.remove('selected');
+        const type = namaRute === 'SafePass' ? 'safepass' : 'fastest';
+        applyRouteSelection(type);
+        if (type === 'safepass') {
             routeName.textContent = 'SafePass (Rekomendasi Jalur Aman)';
         } else {
-            cardFast.classList.add('selected');
-            cardSafe.classList.remove('selected');
             routeName.textContent = 'Rute Tercepat';
         }
 
@@ -640,8 +769,7 @@
     }
 
     function selesaikanPerjalanan() {
-        document.getElementById('cardSafePass').classList.remove('selected');
-        document.getElementById('cardTercepat').classList.remove('selected');
+        resetRouteSelection();
         document.getElementById('activeTripPanel').classList.add('d-none');
         window.taShowAlert('Perjalanan telah diselesaikan. Tetap jaga keselamatan Anda!', 'success');
     }
@@ -656,12 +784,13 @@
     }
 
     mapRute.on('click', function(e) {
-        setDestinationPoint(e.latlng.lat, e.latlng.lng, 'Memuat alamat...');
+        setDestinationPoint(e.latlng.lat, e.latlng.lng, 'Memuat alamat...', true);
         mapRute.flyTo(e.latlng, Math.max(mapRute.getZoom(), 15));
         reverseGeocode(e.latlng.lat, e.latlng.lng)
             .then(address => {
-                setDestinationPoint(e.latlng.lat, e.latlng.lng, address);
-                showRouteStatus('Alamat tujuan diperbarui dari peta. Klik "Cari & Bandingkan".', 'info');
+                $route('destinationSearch').value = address;
+                renderSelectionMarkers();
+                showRouteStatus('Alamat tujuan diperbarui dari peta. Komparasi rute sedang dihitung.', 'info');
             })
             .catch(error => {
                 setDestinationPoint(e.latlng.lat, e.latlng.lng, `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`);
@@ -669,14 +798,20 @@
             });
     });
 
-    $route('pilihanAsal').addEventListener('change', setRegionDefaults);
+    $route('pilihanAsal').addEventListener('change', () => {
+        setRegionDefaults();
+        loadRouteMapMarkers($route('pilihanAsal').value).catch(error => showRouteStatus(error.message));
+    });
     document.querySelectorAll('.mode-tab').forEach(button => button.addEventListener('click', () => {
         document.querySelectorAll('.mode-tab').forEach(tab => {
             tab.className = tab === button
                 ? 'btn btn-sm btn-success mode-tab active rounded-pill px-3'
                 : 'btn btn-sm btn-outline-success mode-tab rounded-pill px-3';
         });
-        $route('routeMode').value = button.dataset.mode;
+        selectedMode = button.dataset.mode;
+        $route('routeMode').value = selectedMode;
+        resetRouteSelection();
+        if ($route('originLat').value && $route('destinationLat').value) compareRoutes();
     }));
 
     $route('searchDestination').addEventListener('click', () => searchDestination().catch(error => showRouteStatus(error.message)));
@@ -709,6 +844,7 @@
         }, () => showRouteStatus('Lokasi GPS tidak dapat diakses.'));
     });
     $route('swapRoutePoints').addEventListener('click', () => {
+        resetRouteSelection();
         const originLabel = $route('pilihanAsal').selectedOptions[0]?.textContent || 'Asal';
         const destinationLabel = $route('destinationSearch').value || 'Tujuan';
         const originLat = $route('originLat').value;
@@ -724,6 +860,7 @@
             [Number($route('originLat').value), Number($route('originLng').value)],
             [Number($route('destinationLat').value), Number($route('destinationLng').value)]
         ], {padding: [35, 35]});
+        if ($route('originLat').value && $route('destinationLat').value) compareRoutes();
     });
 
     $route('compareRoutesButton').addEventListener('click', compareRoutes);
@@ -743,6 +880,7 @@
         }, 300);
 
         loadRouteRegions()
+            .then(() => loadRouteMapMarkers($route('pilihanAsal').value))
             .then(() => checkSharedRouteFromUrl())
             .catch(error => showRouteStatus(error.message));
     });
