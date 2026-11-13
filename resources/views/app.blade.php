@@ -10,6 +10,11 @@
         overflow: hidden;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
     }
+    .ta-mobile-region-select {
+        flex: 1 1 210px;
+        min-width: 0;
+        width: auto !important;
+    }
 </style>
 @endpush
 
@@ -187,10 +192,16 @@
                 ? 'btn btn-sm btn-outline-success active rounded-pill px-3 fw-semibold'
                 : 'btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold';
         });
+        const mobileSelect = document.getElementById('mobileAppRegionSelect');
+        if (mobileSelect) mobileSelect.value = button.dataset.region;
         loadAppMap(button.dataset.region).catch(error => window.taShowAlert(error.message, 'danger'));
     }
 
-    document.querySelectorAll('[data-region]').forEach(button => button.addEventListener('click', () => selectAppRegion(button)));
+    document.querySelectorAll('#region-switcher [data-region], [data-region]').forEach(button => button.addEventListener('click', () => selectAppRegion(button)));
+    document.getElementById('mobileAppRegionSelect')?.addEventListener('change', event => {
+        const matchingButton = document.querySelector(`[data-region="${event.target.value}"]`);
+        matchingButton?.click();
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {

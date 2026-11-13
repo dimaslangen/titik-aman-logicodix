@@ -9,33 +9,79 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <div class="alert alert-danger border-0 rounded-3 small mb-3">
+                <div class="alert alert-danger border-0 rounded-3 small mb-3 sos-info-alert">
                     <strong>PENTING:</strong> Layanan darurat Polisi Nasional adalah <strong>110</strong> (Bebas Pulsa). Tombol ini memancarkan sinyal darurat langsung ke sistem patroli.
                 </div>
                 <div class="d-grid mb-3">
-                    <a href="tel:110" class="btn btn-danger btn-lg py-3 fw-bold rounded-pill shadow-sm">
-                        <i class="bi bi-telephone-fill me-2"></i> PANGGIL POLISI 110 SEKARANG
+                    <a href="tel:110" class="btn btn-danger sos-call-button">
+                        <i class="bi bi-telephone-fill me-2"></i>Panggil Polisi 110
                     </a>
                 </div>
                 <hr>
-                <h6 class="fw-bold text-dark small mb-2">Pancarkan Sinyal SOS ke Petugas Grid:</h6>
-                <div class="mb-3">
-                    <label class="form-label text-muted small mb-1">Pilih Wilayah Anda:</label>
-                    <select class="form-select form-select-sm rounded-3" id="taSosRegionSelect">
-                        <option value="unesa-lidah-wetan">UNESA Lidah Wetan</option>
-                        <option value="unesa-ketintang">UNESA Ketintang</option>
-                        <option value="rawamangun">Rawamangun</option>
-                    </select>
+                <div class="sos-grid-form">
+                    <h6 class="fw-bold text-dark small mb-3">Pancarkan Sinyal SOS ke Petugas Grid:</h6>
+                    <div class="mb-3">
+                        <label class="form-label sos-form-label mb-1" for="taSosRegionSelect">Pilih Wilayah Anda:</label>
+                        <select class="form-select rounded-3" id="taSosRegionSelect">
+                            <option value="unesa-lidah-wetan">UNESA Lidah Wetan</option>
+                            <option value="unesa-ketintang">UNESA Ketintang</option>
+                            <option value="rawamangun">Rawamangun</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label sos-form-label mb-1" for="taSosNotesInput">Catatan Darurat (Opsional):</label>
+                        <textarea class="form-control" id="taSosNotesInput" rows="2" placeholder="Contoh: Butuh pertolongan darurat di dekat gerbang..."></textarea>
+                    </div>
+                    <button type="button" class="btn btn-outline-danger sos-grid-submit" id="btnTaKirimSos" onclick="window.taKirimSosGrid()">
+                        <i class="bi bi-broadcast me-1"></i>Pancarkan Sinyal Darurat ke Grid
+                    </button>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label text-muted small mb-1">Catatan Darurat (Opsional):</label>
-                    <textarea class="form-control form-control-sm rounded-3" id="taSosNotesInput" rows="2" placeholder="Contoh: Butuh pertolongan darurat di dekat gerbang..."></textarea>
-                </div>
-                <button type="button" class="btn btn-outline-danger w-100 rounded-pill fw-semibold py-2" id="btnTaKirimSos" onclick="window.taKirimSosGrid()">
-                    <i class="bi bi-broadcast me-1"></i> Pancarkan Sinyal Darurat ke Grid
-                </button>
                 <div id="taSosStatusMsg" class="small text-center mt-2 text-muted"></div>
             </div>
+
+            <style>
+                .sos-info-alert {
+                    border-radius: 12px !important;
+                    font-size: .8125rem;
+                    padding: .75rem .9rem;
+                }
+                .sos-call-button {
+                    border-radius: 12px;
+                    font-size: .9rem;
+                    font-weight: 700;
+                    min-height: 44px;
+                    padding: .6rem 1rem;
+                    width: 100%;
+                }
+                .sos-grid-form {
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 14px;
+                    padding: 1rem;
+                }
+                .sos-form-label {
+                    color: #334155;
+                    font-size: .8rem;
+                    font-weight: 600;
+                }
+                #taSosRegionSelect {
+                    border-radius: 10px;
+                    font-size: .875rem;
+                    min-height: 38px;
+                }
+                #taSosNotesInput {
+                    border-radius: 10px;
+                    font-size: .85rem;
+                    resize: none;
+                }
+                .sos-grid-submit {
+                    border-radius: 12px;
+                    font-size: .875rem;
+                    font-weight: 600;
+                    min-height: 42px;
+                    width: 100%;
+                }
+            </style>
         </div>
     </div>
 </div>

@@ -25,16 +25,27 @@
         box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
     }
     .route-search-panel { width: 100%; max-width: none; }
-    .route-mode-tabs { overflow-x: auto; flex-wrap: nowrap !important; padding-bottom: 2px; }
-    .route-mode-tabs .mode-tab { flex: 0 0 auto; }
-    .route-search-controls { min-width: 0; }
+    .route-mode-tabs { display: flex; gap: 8px; padding-bottom: 2px; }
+    .route-mode-tabs .mode-tab {
+        flex: 1 1 0;
+        font-size: .82rem;
+        justify-content: center;
+        min-width: 0;
+        padding: .45rem .5rem;
+        white-space: nowrap;
+    }
+    .route-search-controls { align-items: center; display: flex; flex-wrap: nowrap; gap: 10px; min-width: 0; }
+    .route-search-controls > .flex-grow-1 { flex: 1 1 auto !important; min-width: 0; }
     .route-search-row { position: relative; }
     .route-search-row .route-icon {
         width: 1.25rem;
         flex: 0 0 1.25rem;
         text-align: center;
     }
-    .route-search-row input { min-width: 0; }
+    .route-search-row input,
+    .route-search-row select {
+    min-width: 0;
+    }
     .route-suggestions {
         position: absolute;
         z-index: 1000;
@@ -62,15 +73,16 @@
         width: 6px;
     }
     @media (max-width: 767.98px) {
-        .route-search-controls {
-            align-items: stretch !important;
-            flex-direction: column;
+        .route-search-row {
+            padding: .45rem .65rem !important;
         }
-        .route-search-controls > .flex-grow-1 {
-            width: 100%;
+        .route-search-row input,
+        .route-search-row select {
+            font-size: .85rem !important;
         }
         .route-search-controls > #swapRoutePoints {
-            align-self: center;
+            width: 38px !important;
+            height: 38px !important;
         }
         .route-option-card h6,
         .route-option-card p {
@@ -106,11 +118,6 @@
 
     <!-- Panel Pencarian Rute ala Google Maps -->
     <div class="bg-white p-3 p-md-4 rounded-4 shadow-sm mb-3 route-search-panel w-100">
-        <div class="route-mode-tabs d-flex flex-wrap gap-2 mb-3" role="group" aria-label="Moda transportasi">
-            <button type="button" class="btn btn-sm btn-outline-success mode-tab rounded-pill px-3" data-mode="mobil"><i class="bi bi-car-front-fill me-1"></i> Mobil</button>
-            <button type="button" class="btn btn-sm btn-success mode-tab active rounded-pill px-3" data-mode="motor"><i class="bi bi-bicycle me-1"></i> Motor</button>
-            <button type="button" class="btn btn-sm btn-outline-success mode-tab rounded-pill px-3" data-mode="jalan_kaki"><i class="bi bi-person-walking me-1"></i> Jalan kaki</button>
-        </div>
         <div class="route-search-controls d-flex align-items-center gap-2">
             <div class="flex-grow-1">
                 <div class="route-search-row d-flex align-items-center gap-2 border rounded-3 px-3 py-2 mb-2">
@@ -130,7 +137,7 @@
                 </div>
                 <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i> Klik peta untuk memilih titik tujuan.</small>
             </div>
-            <button type="button" class="btn btn-outline-secondary rounded-circle ta-circle ta-circle-40 flex-shrink-0" id="swapRoutePoints" title="Tukar asal dan tujuan" aria-label="Tukar asal dan tujuan">⇅</button>
+            <button type="button" class="btn btn-outline-secondary rounded-circle ta-circle ta-circle-38 flex-shrink-0" id="swapRoutePoints" title="Tukar asal dan tujuan" aria-label="Tukar asal dan tujuan">⇅</button>
         </div>
         <input type="hidden" id="originLat">
         <input type="hidden" id="originLng">
@@ -146,6 +153,11 @@
 
     <!-- Panel Bawah: Pilihan Rute Perjalanan -->
     <div class="bg-white p-4 rounded-4 shadow-sm">
+        <div class="route-mode-tabs mb-3" role="group" aria-label="Moda transportasi">
+            <button type="button" class="btn btn-sm btn-outline-success mode-tab rounded-pill px-2" data-mode="mobil"><i class="bi bi-car-front-fill me-1"></i>Mobil</button>
+            <button type="button" class="btn btn-sm btn-success mode-tab active rounded-pill px-2" data-mode="motor"><i class="bi bi-bicycle me-1"></i>Motor</button>
+            <button type="button" class="btn btn-sm btn-outline-success mode-tab rounded-pill px-2" data-mode="jalan_kaki"><i class="bi bi-person-walking me-1"></i>Jalan kaki</button>
+        </div>
         <div class="mb-3">
             <button type="button" class="btn btn-success w-100 py-2 fw-bold shadow-sm" id="compareRoutesButton">
                 <i class="bi bi-search me-1"></i> Cari & Bandingkan Rute
