@@ -11,12 +11,14 @@ Hackathon **LOGICODIX 2026**, subtema Civic Tech & Community Service.
 
 ## Tim
 
-| Peran | Orang | Tugas |
-|---|---|---|
+NAMA TIM: PATPUL HEKER
+
+| Peran               |                       Orang   | Tugas |
+|---------------------|-------------------------------|--------|
 | Back-End, Ketua Tim | Dimas (Langen Dimas Pramudya) | API ini |
-| PM & UI/UX | Chika | Desain |
-| Front-End | Amy | UI (Leaflet) memakai API ini |
-| AI & QA | Rafa | Gemini 2.5 Flash (lihat `API.md` → Kontrak Gemini) |
+| PM & UI/UX          | Chika                         | Desain |
+| Front-End           | Amy                           | UI (Leaflet) memakai API ini |
+| AI & QA             | Rafa                          | Gemini 2.5 Flash (lihat `API.md` → Kontrak Gemini) |
 
 ## Yang dibangun di repo ini — dan yang TIDAK
 

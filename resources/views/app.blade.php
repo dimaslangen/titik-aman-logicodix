@@ -14,10 +14,15 @@
 @endpush
 
 @section('content')
-    <!-- Topbar Header -->
-    <x-topbar title="Peta TitikAman" subtitle="Navigasi Komunitas">
-        <span class="badge bg-light text-secondary border px-3 py-1 rounded-pill">v1.0</span>
-    </x-topbar>
+   <!-- Topbar Header -->
+<x-topbar title="Peta TitikAman" subtitle="Navigasi Komunitas">
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-light text-secondary border px-3 py-1 rounded-pill">
+            v1.0
+        </span>
+    </div>
+</x-topbar>
+
 
     <!-- Filter / Quick Bar di atas Peta -->
     <div class="bg-white p-3 rounded-4 shadow-sm mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2">

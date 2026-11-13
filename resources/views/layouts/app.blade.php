@@ -27,6 +27,12 @@
             font-family: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         .ta-shell { min-height: 100vh; }
+        .ta-desktop-nav { 
+            width: 17rem; 
+            flex: 0 0 17rem; 
+            background: #ffffff; 
+            border-right: 1px solid #e2e8f0;
+        }
         .ta-main {
             min-width: 0;
             padding: 1rem;
@@ -35,9 +41,23 @@
         .ta-content { width: 100%; max-width: 1440px; margin: 0 auto; }
         .ta-card { background: var(--ta-surface); border: 1px solid #e2e8f0; border-radius: 1rem; }
         .ta-map { min-height: 300px; }
+        
+        /* Styling Logo Header Sidebar */
+        .ta-brand-header {
+            padding: 1.25rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .ta-brand-logo {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
         @media (min-width: 768px) {
             .ta-shell { display: flex; }
-            .ta-desktop-nav { width: 17rem; flex: 0 0 17rem; }
             .ta-main { flex: 1 1 auto; height: 100vh; overflow-y: auto; padding: 1.5rem; }
             .ta-map { min-height: 440px; }
         }
@@ -50,7 +70,18 @@
 </head>
 <body>
     <div class="ta-shell">
+        <!-- Sidebar Desktop -->
         <aside class="ta-desktop-nav d-none d-md-block">
+            <!-- Header Logo Brand TitikAman -->
+            <div class="ta-brand-header">
+                <img src="{{ asset('images/logo.jpeg') }}" alt="Logo TitikAman" class="ta-brand-logo shadow-sm">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.3px; line-height: 1.1;">TitikAman</h5>
+                    <small class="text-muted fw-semibold d-block" style="font-size: 10px; letter-spacing: 0.8px; margin-top: 2px;">CIVIC SAFETY GRID</small>
+                </div>
+            </div>
+
+            <!-- Menu Navigasi Komponen Navbar -->
             <x-navbar />
         </aside>
 
