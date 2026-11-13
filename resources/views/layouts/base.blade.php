@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'TitikAman - Civic Safety Grid')</title>
 
+    <link rel="icon" type="image/png" href="{{ asset('images/TitikAman(no-teks).png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -13,13 +17,21 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
+        :root {
+            --ta-primary: #15803D;
+            --ta-primary-deep: #11653A;
+            --ta-lime: #65A30D;
+            --ta-lime-bright: #80C826;
+            --ta-active-bg: rgba(21, 128, 61, 0.10);
+            --ta-active-border: rgba(21, 128, 61, 0.22);
+        }
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
             overflow: hidden; /* Mencegah window utama ikut scroll */
             background-color: #f4f7f6;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Instrument Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .app-wrapper {
             display: flex;
@@ -60,8 +72,9 @@
             transition: all 0.2s ease;
         }
         .nav-link:hover, .nav-link.active {
-            background-color: #e6fffa;
-            color: #0d9488;
+            background-color: rgba(21, 128, 61, 0.10);
+            color: #11653A;
+            border: 1px solid rgba(21, 128, 61, 0.22);
         }
         .nav-link.active {
             font-weight: 600;

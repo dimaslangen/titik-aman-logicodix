@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0f766e">
+    <meta name="theme-color" content="#11653A">
     <title>@yield('title', 'TitikAman - Civic Safety Grid')</title>
 
+    <link rel="icon" type="image/png" href="{{ asset('images/TitikAman(no-teks).png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css'])
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -17,14 +21,19 @@
             --ta-muted: #64748b;
             --ta-surface: #ffffff;
             --ta-background: #f1f5f9;
-            --ta-primary: #0f766e;
+            --ta-primary: #15803d;
+            --ta-primary-deep: #11653a;
+            --ta-lime: #65a30d;
+            --ta-lime-bright: #80c826;
+            --ta-active-bg: rgba(21, 128, 61, 0.10);
+            --ta-active-border: rgba(21, 128, 61, 0.22);
         }
         html, body {
             min-height: 100%;
             margin: 0;
             background: var(--ta-background);
             color: var(--ta-ink);
-            font-family: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         .ta-shell { min-height: 100vh; }
         .ta-main {
@@ -35,6 +44,14 @@
         .ta-content { width: 100%; max-width: 1440px; margin: 0 auto; }
         .ta-card { background: var(--ta-surface); border: 1px solid #e2e8f0; border-radius: 1rem; }
         .ta-map { min-height: 300px; }
+        .ta-desktop-nav a.bg-success-subtle {
+            background-color: var(--ta-active-bg) !important;
+            border: 1px solid var(--ta-active-border);
+        }
+        .ta-desktop-nav a.text-success,
+        nav[aria-label="Navigasi mobile"] a.text-success {
+            color: var(--ta-primary-deep) !important;
+        }
         @media (min-width: 768px) {
             .ta-shell { display: flex; }
             .ta-desktop-nav { width: 17rem; flex: 0 0 17rem; }

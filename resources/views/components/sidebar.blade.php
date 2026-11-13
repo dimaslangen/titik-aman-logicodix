@@ -1,13 +1,7 @@
 <div>
     <!-- Logo / Brand -->
     <div class="d-flex align-items-center mb-4 px-2">
-        <div class="bg-success text-white p-2 rounded-3 me-2 shadow-sm">
-            <i class="bi bi-shield-check fs-4"></i>
-        </div>
-        <div>
-            <h5 class="fw-bold mb-0 text-dark">TitikAman</h5>
-            <small class="text-muted fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">CIVIC SAFETY GRID</small>
-        </div>
+        <x-brand-logo theme="light" size="md" />
     </div>
 
     <!-- Kotak Informasi Singkat -->
@@ -44,6 +38,9 @@
             </a>
         </li>
     </ul>
+    <a href="{{ route('tentang') }}" class="nav-link py-2 px-3 mt-3 text-secondary">
+        <i class="bi bi-info-circle me-2"></i> Tentang TitikAman
+    </a>
 </div>
 
 <!-- Footer Status -->
