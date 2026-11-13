@@ -17,6 +17,7 @@
     <style>
         html { scroll-behavior: smooth; }
         body {
+            overflow-x: hidden;
             background-color: #f8fafc;
             background-image: linear-gradient(rgba(15, 23, 42, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, .04) 1px, transparent 1px);
             background-size: 64px 64px;
@@ -27,7 +28,39 @@
         .route-map { background: linear-gradient(145deg, #f0fdf4, #eff6ff); }
         .route-line { stroke-dasharray: 8 8; }
         .gradient-brand { background: linear-gradient(135deg, #11653a, #2fa33e 55%, #80c826); }
-        .mobile-menu[hidden] { display: none; }
+        .mobile-menu {
+            max-height: 320px;
+            opacity: 1;
+            overflow: hidden;
+            transition: max-height .25s ease, opacity .2s ease;
+        }
+        .mobile-menu[hidden] {
+            display: block;
+            max-height: 0;
+            opacity: 0;
+            padding-bottom: 0;
+            padding-top: 0;
+            pointer-events: none;
+        }
+        .simulator-metrics > div {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+        @media (max-width: 380px) {
+            .simulator-map {
+                height: 20rem !important;
+            }
+            .simulator-card {
+                padding: .75rem !important;
+            }
+            .simulator-panel {
+                padding: .75rem !important;
+            }
+            .simulator-panel button {
+                padding-left: .6rem;
+                padding-right: .6rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -70,8 +103,8 @@
                 <p class="mt-10 flex items-center gap-3 text-xs text-slate-500"><span class="h-2.5 w-2.5 rounded-full bg-lime-500 shadow-[0_0_0_7px_rgba(101,163,13,.12)]"></span>Monitoring komunitas aktif di 3 wilayah</p>
             </div>
 
-            <div class="rounded-3xl border border-slate-200/90 bg-white p-4 shadow-xl shadow-slate-900/10 md:p-6" aria-label="Simulator perbandingan rute interaktif">
-                <div class="route-map relative h-[24rem] overflow-hidden rounded-2xl border border-slate-200 p-4 sm:h-[29rem]">
+            <div class="simulator-card rounded-3xl border border-slate-200/90 bg-white p-4 shadow-xl shadow-slate-900/10 md:p-6" aria-label="Simulator perbandingan rute interaktif">
+                <div class="route-map simulator-map relative h-[24rem] overflow-hidden rounded-2xl border border-slate-200 p-4 sm:h-[29rem]">
                     <div class="absolute left-5 top-5 z-10 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[.16em] text-slate-500"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>Live route telemetry</div>
                     <svg class="absolute inset-0 h-full w-full" viewBox="0 0 500 520" fill="none" aria-hidden="true">
                         <path d="M25 120C125 80 125 205 220 165S320 80 480 125M-15 350C80 270 170 390 260 305S370 230 520 285M75 0C125 110 75 250 155 520M355-10C315 100 390 230 325 530" stroke="#cbd5e1" stroke-width="2"/>
@@ -80,9 +113,9 @@
                         <path id="safe-route-line" class="transition-opacity duration-300" d="M95 185C150 300 235 355 300 315S350 300 390 345" stroke="#15803d" stroke-width="7" opacity="0"/>
                         <circle cx="95" cy="185" r="10" fill="#15803d" stroke="white" stroke-width="4"/><circle cx="390" cy="345" r="10" fill="#dc2626" stroke="white" stroke-width="4"/><circle cx="300" cy="315" r="8" fill="#2563eb" stroke="white" stroke-width="3"/>
                     </svg>
-                    <div class="absolute bottom-4 left-4 right-4 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-lg backdrop-blur">
+                    <div class="simulator-panel absolute bottom-4 left-4 right-4 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-lg backdrop-blur">
                         <div class="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p class="m-0 text-[10px] font-extrabold uppercase tracking-[.15em] text-slate-400">Simulator</p><p id="route-mode-label" class="mt-1 text-sm font-bold text-slate-900">Rute Tercepat Biasa</p></div><div class="flex rounded-full bg-slate-100 p-1 text-[10px] font-bold"><button id="fast-route-toggle" type="button" class="rounded-full bg-slate-700 px-3 py-1.5 text-white">Tercepat</button><button id="safe-route-toggle" type="button" class="rounded-full px-3 py-1.5 text-slate-500">SafePass</button></div></div>
-                        <div class="grid grid-cols-3 gap-3 text-xs"><div><span class="block text-slate-500">Durasi</span><strong id="route-duration" class="mt-1 block text-slate-900">18 menit</strong></div><div><span class="block text-slate-500">Risiko</span><strong id="route-risk" class="mt-1 block text-yellow-600">Sedang</strong></div><div><span class="block text-slate-500">Safety Hub</span><strong id="route-hubs" class="mt-1 block text-slate-900">0 dilewati</strong></div></div>
+                        <div class="simulator-metrics grid grid-cols-3 gap-2 text-xs sm:gap-3"><div><span class="block text-slate-500">Durasi</span><strong id="route-duration" class="mt-1 block text-slate-900">18 menit</strong></div><div><span class="block text-slate-500">Risiko</span><strong id="route-risk" class="mt-1 block text-yellow-600">Sedang</strong></div><div><span class="block text-slate-500">Safety Hub</span><strong id="route-hubs" class="mt-1 block text-slate-900">0 dilewati</strong></div></div>
                     </div>
                 </div>
             </div>

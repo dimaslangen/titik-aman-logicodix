@@ -4,16 +4,71 @@
 
 @push('styles')
 <style>
-    .camera-box {
-        border: 2px dashed #cbd5e1;
-        background-color: #f8fafc;
-        border-radius: 12px;
-        transition: all 0.2s;
-        cursor: pointer;
+    .camera-stage,
+    .camera-controls {
+        max-width: 400px;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
     }
-    .camera-box:hover {
+    .camera-stage {
+        aspect-ratio: 1 / 1;
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+    }
+    .camera-viewport {
+        height: 100%;
+        width: 100%;
+    }
+    .camera-placeholder {
+        align-items: center;
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        transition: border-color .2s, background-color .2s;
+    }
+    .camera-placeholder:hover {
+        background: #f0fdfa;
         border-color: #0d9488;
-        background-color: #f0fdfa;
+    }
+    .camera-live {
+        background: #0f172a;
+    }
+    .camera-live video,
+    .camera-preview img {
+        display: block;
+        height: 100%;
+        object-fit: cover;
+        width: 100%;
+    }
+    .camera-preview {
+        background: #f0fdf4;
+        border: 2px solid #86efac;
+    }
+    .camera-controls {
+        margin-top: 14px;
+    }
+    .camera-controls .btn {
+        min-height: 46px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+    .camera-capture {
+        background: linear-gradient(135deg, #11653a, #2fa33e);
+        border: 0;
+        color: #fff;
+    }
+    .camera-capture:hover,
+    .camera-capture:focus {
+        background: linear-gradient(135deg, #0d5130, #15803d);
+        color: #fff;
+    }
+    .camera-secondary {
+        margin-top: .5rem;
     }
 </style>
 @endpush
@@ -48,49 +103,52 @@
         <div class="mb-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <label class="form-label fw-bold text-dark small mb-0"><span class="badge bg-dark rounded-circle ta-circle ta-circle-24 me-1">1</span> Ambil Foto Kondisi</label>
-                <!-- Tombol Ganti Kamera (Depan/Belakang) -->
-                <button type="button" id="btnSwitchKamera" class="btn btn-outline-secondary btn-sm rounded-pill d-none" onclick="gantiKamera()">
-                    <i class="bi bi-camera-recess me-1"></i> Ganti Kamera
-                </button>
             </div>
             <p class="text-muted small mb-2">Aktifkan kamera langsung untuk validasi keamanan.</p>
             
-            <!-- Kotak Utama Kamera / Tombol Buka -->
-            <div id="wrapperBukaKamera" class="camera-box p-5 text-center position-relative" onclick="nyalakanKamera()">
-                <div class="py-4">
-                    <div class="bg-success text-white rounded-circle ta-circle ta-circle-56 d-inline-flex p-3 mb-2 shadow-sm">
-                        <i class="bi bi-camera-fill fs-3"></i>
+            <div class="camera-stage">
+                <!-- State 1: Kamera belum aktif -->
+                <div id="wrapperBukaKamera" class="camera-viewport camera-placeholder p-4" onclick="nyalakanKamera()" role="button" tabindex="0" aria-label="Nyalakan kamera langsung">
+                    <div>
+                        <div class="bg-success text-white rounded-circle ta-circle ta-circle-56 d-inline-flex p-3 mb-3 shadow-sm">
+                            <i class="bi bi-camera-fill fs-3"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Nyalakan Kamera Langsung</h6>
+                        <p class="text-muted small mb-0">Ketuk untuk mengaktifkan kamera depan/belakang</p>
                     </div>
-                    <h6 class="fw-bold text-dark mb-1">Nyalakan Kamera Langsung</h6>
-                    <p class="text-muted small mb-0">Ketuk untuk mengaktifkan kamera depan/belakang</p>
+                </div>
+
+                <!-- State 2: Kamera aktif, tanpa tombol menutupi video -->
+                <div id="wrapperVideoKamera" class="camera-viewport camera-live d-none">
+                    <video id="videoKamera" autoplay playsinline aria-label="Pratinjau kamera"></video>
+                </div>
+
+                <!-- State 3: Hasil foto -->
+                <div id="previewContainer" class="camera-viewport camera-preview d-none">
+                    <img id="imgPreview" src="" alt="Hasil Foto">
                 </div>
             </div>
 
-            <!-- Area Tampilan Video Kamera -->
-            <div id="wrapperVideoKamera" class="d-none text-center position-relative bg-black rounded-4 overflow-hidden shadow-sm p-2">
-                <video id="videoKamera" autoplay playsinline class="w-100 rounded-3" style="max-height: 350px; object-fit: cover; transform: scaleX(-1);"></video>
-                <div class="mt-3 pb-2">
-                    <button type="button" class="btn btn-light text-dark fw-bold px-4 rounded-pill shadow-sm me-2" onclick="ambilFoto()">
-                        <i class="bi bi-circle-fill text-danger me-1"></i> Jepret Foto
-                    </button>
-                    <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="matikanKamera()">
-                        Tutup Kamera
+            <!-- Kontrol kamera selalu berada di luar viewport -->
+            <div id="cameraActiveControls" class="camera-controls d-none">
+                <button type="button" id="btnJepret" class="camera-capture btn w-100" onclick="ambilFoto()">
+                    <i class="bi bi-camera-fill me-2"></i>Jepret Foto
+                </button>
+                <div class="camera-secondary">
+                    <button type="button" id="btnTutupKamera" class="btn btn-outline-danger w-100" onclick="matikanKamera()">
+                        <i class="bi bi-x-circle me-1"></i>Tutup Kamera
                     </button>
                 </div>
+            </div>
+            <div id="photoControls" class="camera-controls d-none">
+                <button type="button" id="btnFotoUlang" class="btn btn-outline-secondary w-100" onclick="ulangiFoto()">
+                    <i class="bi bi-arrow-repeat me-1"></i>Foto Ulang
+                </button>
             </div>
 
             <!-- Canvas Tersembunyi untuk Capture Foto -->
             <canvas id="canvasFoto" class="d-none"></canvas>
 
-            <!-- Preview Hasil Jepretan Foto -->
-            <div id="previewContainer" class="mt-3 d-none text-center">
-                <img id="imgPreview" src="" alt="Hasil Foto" class="img-fluid rounded-4 shadow-sm border" style="max-height: 250px;">
-                <div class="mt-2">
-                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="ulangiFoto()">
-                        <i class="bi bi-arrow-repeat me-1"></i> Ambil Ulang Foto
-                    </button>
-                </div>
-            </div>
         </div>
 
         <!-- 3. Keterangan / Form Laporan -->
@@ -163,7 +221,6 @@
 @push('scripts')
 <script>
     let mediaStream = null;
-    let useFrontCamera = false;
     let currentLatitude = null;
     let currentLongitude = null;
     let capturedPhoto = null;
@@ -171,7 +228,8 @@
     async function nyalakanKamera() {
         const wrapperBuka = document.getElementById('wrapperBukaKamera');
         const wrapperVideo = document.getElementById('wrapperVideoKamera');
-        const btnSwitch = document.getElementById('btnSwitchKamera');
+        const cameraControls = document.getElementById('cameraActiveControls');
+        const photoControls = document.getElementById('photoControls');
         const video = document.getElementById('videoKamera');
 
         if (!video) return;
@@ -179,7 +237,7 @@
         try {
             matikanKameraStreamSaja();
             const constraints = {
-                video: { facingMode: useFrontCamera ? "user" : "environment" },
+                video: { facingMode: "environment" },
                 audio: false
             };
             mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -187,17 +245,12 @@
 
             if (wrapperBuka) wrapperBuka.classList.add('d-none');
             if (wrapperVideo) wrapperVideo.classList.remove('d-none');
-            if (btnSwitch) btnSwitch.classList.remove('d-none');
+            if (cameraControls) cameraControls.classList.remove('d-none');
+            if (photoControls) photoControls.classList.add('d-none');
         } catch (err) {
             console.error("Gagal mengakses kamera:", err);
             window.taShowAlert("Tidak dapat mengakses kamera. Pastikan izin kamera di browser sudah diaktifkan.", 'danger');
         }
-    }
-
-    async function gantiKamera() {
-        useFrontCamera = !useFrontCamera;
-        matikanKameraStreamSaja();
-        await nyalakanKamera(); 
     }
 
     function ambilFoto() {
@@ -206,7 +259,8 @@
         const imgPreview = document.getElementById('imgPreview');
         const previewContainer = document.getElementById('previewContainer');
         const wrapperVideo = document.getElementById('wrapperVideoKamera');
-        const btnSwitch = document.getElementById('btnSwitchKamera');
+        const cameraControls = document.getElementById('cameraActiveControls');
+        const photoControls = document.getElementById('photoControls');
 
         if (!video || !canvas || !imgPreview) return;
 
@@ -223,7 +277,8 @@
         matikanKameraStreamSaja();
 
         if (wrapperVideo) wrapperVideo.classList.add('d-none');
-        if (btnSwitch) btnSwitch.classList.add('d-none');
+        if (cameraControls) cameraControls.classList.add('d-none');
+        if (photoControls) photoControls.classList.remove('d-none');
         if (previewContainer) previewContainer.classList.remove('d-none');
     }
 
@@ -237,17 +292,20 @@
     function matikanKamera() {
         matikanKameraStreamSaja();
         const wrapperVideo = document.getElementById('wrapperVideoKamera');
-        const btnSwitch = document.getElementById('btnSwitchKamera');
         const wrapperBuka = document.getElementById('wrapperBukaKamera');
+        const cameraControls = document.getElementById('cameraActiveControls');
+        const photoControls = document.getElementById('photoControls');
 
         if (wrapperVideo) wrapperVideo.classList.add('d-none');
-        if (btnSwitch) btnSwitch.classList.add('d-none');
         if (wrapperBuka) wrapperBuka.classList.remove('d-none');
+        if (cameraControls) cameraControls.classList.add('d-none');
+        if (photoControls) photoControls.classList.add('d-none');
     }
 
     function ulangiFoto() {
         const previewContainer = document.getElementById('previewContainer');
         if (previewContainer) previewContainer.classList.add('d-none');
+        document.getElementById('photoControls')?.classList.add('d-none');
         nyalakanKamera();
     }
 
@@ -365,6 +423,8 @@
         const imgPreview = document.getElementById('imgPreview');
         if (previewContainer) previewContainer.classList.add('d-none');
         if (imgPreview) imgPreview.removeAttribute('src');
+        document.getElementById('cameraActiveControls')?.classList.add('d-none');
+        document.getElementById('photoControls')?.classList.add('d-none');
         const status = document.getElementById('statusKirimLaporan');
         if (status) {
             status.className = 'small text-center text-muted mt-2';

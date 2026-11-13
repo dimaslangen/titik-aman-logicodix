@@ -4,10 +4,13 @@
     'backUrl' => null,
 ])
 
-<div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm flex-wrap gap-2">
-    <div class="d-flex align-items-center">
+<div class="ta-topbar d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm flex-wrap gap-2">
+    <div class="ta-topbar-heading d-flex align-items-center min-width-0">
+        <button type="button" class="ta-sidebar-toggle btn btn-light d-lg-none rounded-circle ta-circle ta-circle-40 me-2" onclick="window.taToggleSidebar()" aria-label="Buka menu navigasi">
+            <i class="bi bi-list fs-5"></i>
+        </button>
         @if($backUrl)
-            <a href="{{ $backUrl }}" class="btn btn-light btn-sm rounded-circle ta-circle ta-circle-38 me-3 text-secondary">
+            <a href="{{ $backUrl }}" class="btn btn-light btn-sm rounded-circle ta-circle ta-circle-38 me-2 text-secondary">
                 <i class="bi bi-arrow-left"></i>
             </a>
         @endif
@@ -18,12 +21,7 @@
         </div>
     </div>
 
-    <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
+    <div class="ta-topbar-actions d-flex align-items-center gap-2 ms-auto flex-wrap justify-content-end">
         {{ $slot ?? '' }}
-
-        <!-- Wadah Global Status Auth (Masuk / Profil Avatar Dropdown) -->
-        <div data-ta-auth class="d-flex align-items-center gap-2">
-            <span class="spinner-border spinner-border-sm text-secondary" id="authSpinner" role="status" style="width: 14px; height: 14px;"></span>
-        </div>
     </div>
 </div>

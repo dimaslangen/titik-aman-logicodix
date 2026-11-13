@@ -1,64 +1,71 @@
-<div>
-    <!-- Logo / Brand -->
-    <div class="d-flex align-items-center mb-4 px-2">
-        <x-brand-logo theme="light" size="md" />
+@props(['active' => null])
+
+@php
+    $active = $active ?? (
+        request()->routeIs('rute') ? 'rute' :
+        (request()->routeIs('hubs') || request()->is('safety-hubs-ui') ? 'hubs' :
+        (request()->routeIs('lapor') ? 'lapor' : 'app'))
+    );
+@endphp
+
+<aside id="taCivicSidebar" class="ta-sidebar" aria-label="Navigasi utama">
+    <div class="d-flex align-items-start justify-content-between gap-2 mb-4">
+        <div>
+            <x-brand-logo theme="light" size="md" />
+            <small class="text-uppercase text-muted fw-bold d-block mt-2" style="font-size: 10px; letter-spacing: .12em;">Civic Safety Grid</small>
+        </div>
+        <button type="button" class="ta-sidebar-close btn btn-light d-lg-none rounded-circle ta-circle ta-circle-40" onclick="window.taToggleSidebar(false)" aria-label="Tutup menu navigasi">
+            <i class="bi bi-x-lg"></i>
+        </button>
     </div>
 
-    <!-- Kotak Informasi Singkat -->
-    <div class="p-3 bg-light rounded-4 mb-4 border-0">
-        <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">Malam Ini</small>
-        <p class="fw-semibold text-dark small mt-1 mb-0">Ruang kota lebih aman, satu laporan pada satu waktu.</p>
-    </div>
+    <nav class="flex-grow-1" aria-label="Menu warga">
+        <ul class="nav flex-column gap-1">
+            <li class="nav-item">
+                <a href="/app" class="nav-link py-2 px-3 {{ $active === 'app' ? 'active' : '' }}" onclick="window.taToggleSidebar(false)">
+                    <i class="bi bi-map me-2"></i>Peta Aman
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/rute-saya" class="nav-link py-2 px-3 {{ $active === 'rute' ? 'active' : '' }}" onclick="window.taToggleSidebar(false)">
+                    <i class="bi bi-signpost-split me-2"></i>Rute Saya
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/safety-hubs-ui" class="nav-link py-2 px-3 {{ $active === 'hubs' ? 'active' : '' }}" onclick="window.taToggleSidebar(false)">
+                    <i class="bi bi-building me-2"></i>Safety Hub
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/lapor-kondisi" class="nav-link py-2 px-3 {{ $active === 'lapor' ? 'active' : '' }}" onclick="return handleSidebarLaporClick(event)">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Lapor Kondisi
+                </a>
+            </li>
+            <li class="nav-item d-none" id="sidebarAdminNav" data-admin-nav="true">
+                <a href="/admin" class="nav-link py-2 px-3 {{ $active === 'admin' ? 'active' : '' }}" onclick="window.taToggleSidebar(false)">
+                    <i class="bi bi-shield-lock me-2"></i>Admin
+                </a>
+            </li>
+        </ul>
 
-    <!-- Menu Navigasi Bersama -->
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a href="/app" class="nav-link py-2 px-3 {{ ($active ?? 'app') === 'app' ? 'active' : '' }}">
-                <i class="bi bi-map me-2"></i> Peta Aman
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="/rute-saya" class="nav-link py-2 px-3 {{ ($active ?? '') === 'rute' ? 'active' : '' }}">
-                <i class="bi bi-signpost-split me-2"></i> Rute Saya
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="/safety-hubs-ui" class="nav-link py-2 px-3 {{ ($active ?? '') === 'hubs' ? 'active' : '' }}">
-                <i class="bi bi-building me-2"></i> Safety Hub
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="/lapor-kondisi" class="nav-link py-2 px-3 {{ ($active ?? '') === 'lapor' ? 'active' : '' }}" onclick="return handleSidebarLaporClick(event)">
-                <i class="bi bi-exclamation-triangle me-2"></i> Lapor Kondisi
-            </a>
-        </li>
-        <li class="nav-item d-none" id="sidebarAdminNav">
-            <a href="/admin" class="nav-link py-2 px-3 {{ ($active ?? '') === 'admin' ? 'active' : '' }}">
-                <i class="bi bi-shield-lock me-2"></i> Admin Panel
-            </a>
-        </li>
-    </ul>
-    <a href="{{ route('tentang') }}" class="nav-link py-2 px-3 mt-3 text-secondary">
-        <i class="bi bi-info-circle me-2"></i> Tentang TitikAman
-    </a>
-</div>
+        <a href="{{ route('tentang') }}" class="nav-link py-2 px-3 mt-3 text-secondary" onclick="window.taToggleSidebar(false)">
+            <i class="bi bi-info-circle me-2"></i>Tentang TitikAman
+        </a>
+    </nav>
 
-<!-- Footer Status -->
-<div class="px-2 pt-3 border-top mt-auto">
-    <div class="d-flex align-items-center">
-        <span class="spinner-grow spinner-grow-sm text-success me-2" role="status"></span>
-        <div style="font-size: 12px;">
-            <span class="fw-semibold text-dark d-block">Sistem Terhubung</span>
-            <span class="text-muted" style="font-size: 10px;">13 Safety Hub Aktif</span>
+    <div class="pt-3 mt-3 border-top">
+        <div data-ta-auth class="ta-sidebar-account">
+            <span class="spinner-border spinner-border-sm text-secondary" id="authSpinner" role="status" style="width: 14px; height: 14px;"></span>
         </div>
     </div>
-</div>
+</aside>
 
 <script>
-    function handleSidebarLaporClick(e) {
+    function handleSidebarLaporClick(event) {
         const token = localStorage.getItem('ta_token');
         if (!token) {
-            e.preventDefault();
+            event.preventDefault();
+            window.taToggleSidebar(false);
             if (typeof window.taPromptGuest === 'function') {
                 window.taPromptGuest(
                     'Masuk untuk Melaporkan Kondisi',

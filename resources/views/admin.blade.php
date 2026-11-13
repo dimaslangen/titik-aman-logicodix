@@ -96,6 +96,14 @@
             border-color: var(--ta-primary);
             box-shadow: 0 0 0 .25rem rgba(21, 128, 61, .15);
         }
+        .form-select,
+        select.form-control {
+            font-size: 0.875rem !important;
+            line-height: 1.35 !important;
+            padding: 0.45rem 2.1rem 0.45rem 0.9rem !important;
+            min-height: 38px !important;
+            height: auto !important;
+        }
         .moderation-search { min-width: 220px; }
         .metric-card {
             border: 1px solid #e2e8f0;
@@ -149,6 +157,153 @@
             margin-bottom: 0;
             padding-bottom: 0;
         }
+        .admin-mobile-menu-toggle {
+            display: none;
+        }
+        .moderation-table {
+            min-width: 780px;
+        }
+        .moderation-card-list {
+            display: grid;
+            gap: 12px;
+        }
+        .moderation-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px;
+        }
+        .moderation-card-description {
+            color: #475569;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+        .moderation-card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .moderation-card-actions .btn {
+            flex: 1 1 auto;
+            min-width: 112px;
+        }
+        .moderation-pagination {
+            margin-top: 16px;
+            text-align: center;
+        }
+        .moderation-pagination-controls {
+            align-items: center;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            white-space: nowrap;
+        }
+        .moderation-pagination .page-arrow,
+        .moderation-pagination .page-number {
+            align-items: center;
+            aspect-ratio: 1 / 1;
+            display: inline-flex;
+            flex: 0 0 auto;
+            justify-content: center;
+            padding: 0;
+            width: 34px;
+            height: 34px;
+        }
+        .moderation-pagination .page-number.active {
+            background: linear-gradient(135deg, #11653A, #2FA33E);
+            border-color: #11653A;
+            color: #fff;
+        }
+        .moderation-pagination .page-info {
+            margin-top: 16px;
+        }
+        .ta-moderation-actions {
+            white-space: nowrap;
+        }
+        @media (max-width: 991.98px) {
+            html, body {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            .app-wrapper {
+                position: relative;
+            }
+            .sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                z-index: 1060;
+                width: min(280px, calc(100vw - 48px));
+                max-width: calc(100vw - 48px);
+                transform: translateX(-105%);
+                transition: transform .25s ease;
+                box-shadow: 16px 0 32px rgba(15, 23, 42, .16);
+            }
+            .sidebar.is-open {
+                transform: translateX(0);
+            }
+            .admin-menu-backdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 1050;
+                background: rgba(15, 23, 42, .48);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity .25s ease;
+            }
+            .admin-menu-backdrop.is-visible {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            .main-content {
+                width: 100%;
+                min-width: 0;
+                padding: 1rem;
+            }
+            .admin-mobile-menu-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex: 0 0 auto;
+            }
+            .admin-control-header {
+                align-items: flex-start !important;
+            }
+            .admin-control-header > .admin-heading {
+                flex: 1 1 220px;
+                min-width: 0;
+            }
+            .admin-control-actions {
+                flex: 1 1 100%;
+                justify-content: flex-start !important;
+            }
+            #regionBtnGroup {
+                max-width: 100%;
+                overflow-x: auto;
+                flex-wrap: nowrap !important;
+            }
+            #regionBtnGroup .region-toggle {
+                flex: 0 0 auto;
+            }
+        }
+        @media (max-width: 575.98px) {
+            .main-content {
+                padding: .75rem;
+            }
+            .admin-control-actions > * {
+                max-width: 100%;
+            }
+            .admin-control-actions .form-check {
+                flex: 1 1 100%;
+            }
+            .admin-control-actions > .btn {
+                flex: 1 1 auto;
+            }
+        }
+        @media (min-width: 992px) {
+            .admin-menu-backdrop {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -156,7 +311,7 @@
     <div class="app-wrapper">
         
         <!-- SIDEBAR ADMIN KIRI -->
-        <div class="sidebar px-3 py-4 d-flex flex-column justify-content-between">
+        <div class="sidebar px-3 py-4 d-flex flex-column justify-content-between" id="adminSidebar">
             <div>
                 <!-- Logo / Brand -->
                 <div class="mb-4 px-2">
@@ -241,17 +396,23 @@
                     </div>
                 </div>
             </div>
+            <div class="admin-menu-backdrop" id="adminMenuBackdrop"></div>
 
             <!-- KONTEN UTAMA KANAN (Command Center) -->
             <div class="main-content">
                 
                 <!-- Sub-Header & Location Toggles -->
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                    <div>
-                        <small class="text-uppercase text-muted fw-bold" style="font-size: 11px;">CIVIC SAFETY COMMAND CENTER</small>
-                        <h3 class="fw-bold text-dark mb-0">Selamat datang, <span id="adminGreeting">Admin</span></h3>
+                    <div class="admin-control-header d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                        <div class="admin-heading d-flex align-items-center gap-2">
+                            <button type="button" class="admin-mobile-menu-toggle btn btn-light border rounded-circle ta-circle ta-circle-40" id="adminMobileMenuToggle" aria-expanded="false" aria-controls="adminSidebar" aria-label="Buka menu admin">
+                                <i class="bi bi-list fs-5"></i>
+                            </button>
+                            <div style="min-width: 0;">
+                                <small class="text-uppercase text-muted fw-bold" style="font-size: 11px;">CIVIC SAFETY COMMAND CENTER</small>
+                                <h3 class="fw-bold text-dark mb-0">Selamat datang, <span id="adminGreeting">Admin</span></h3>
+                            </div>
                     </div>
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="admin-control-actions d-flex align-items-center gap-2 flex-wrap">
                         <!-- Switch Mode Simulasi Lokasi Uji Juri (FR-02.1) -->
                         <div class="form-check form-switch bg-white px-3 py-2 rounded-pill shadow-sm border d-flex align-items-center gap-2 mb-0" title="Aktifkan agar juri dapat menguji fitur pelaporan tanpa batasan radius geofence 20 meter">
                             <input class="form-check-input ms-0 mt-0 cursor-pointer" type="checkbox" role="switch" id="switchSimulation" onchange="toggleSimulationMode(this.checked)">
@@ -264,7 +425,12 @@
                         </button>
 
                         <!-- Pilihan Wilayah -->
-                        <div class="bg-white p-1 rounded-pill shadow-sm border d-flex gap-1" id="regionBtnGroup">
+                        <select id="mobileRegionSelect" class="form-select rounded-pill fw-semibold d-md-none" aria-label="Pilih wilayah mobile">
+                            <option value="unesa-lidah-wetan">UNESA Lidah Wetan</option>
+                            <option value="unesa-ketintang">UNESA Ketintang</option>
+                            <option value="rawamangun">Rawamangun</option>
+                        </select>
+                        <div class="bg-white p-1 rounded-pill shadow-sm border d-none d-md-inline-flex gap-1" id="regionBtnGroup">
                             <button class="btn btn-sm btn-success rounded-pill px-3 fw-semibold region-toggle" data-region="unesa-lidah-wetan">UNESA Lidah Wetan</button>
                             <button class="btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold region-toggle" data-region="unesa-ketintang">UNESA Ketintang</button>
                             <button class="btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold region-toggle" data-region="rawamangun">Rawamangun</button>
@@ -394,25 +560,22 @@
                         </div>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="text-muted border-bottom" style="font-size: 12px; background-color: #fafbfc;">
-                                <tr>
-                                    <th class="py-3">LAPORAN</th>
-                                    <th class="py-3">WILAYAH</th>
-                                    <th class="py-3">KATEGORI</th>
-                                    <th class="py-3">STATUS & UP-CHECK</th>
-                                    <th class="py-3 text-end" style="min-width: 280px;">AKSI CEPAT MODERASI (1-KLIK)</th>
-                                </tr>
-                            </thead>
-                            <tbody style="font-size: 14px;" id="reportsTableBody">
-                                <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted small">
-                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span> Memuat daftar laporan...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div id="reportsTableBody" class="moderation-card-list" aria-live="polite">
+                        <div class="text-center py-4 text-muted small">
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span> Memuat daftar laporan...
+                        </div>
+                    </div>
+                    <div id="moderasiPagination" class="moderation-pagination d-none">
+                        <div class="moderation-pagination-controls">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle page-arrow" id="moderasiPrevious" aria-label="Halaman sebelumnya">
+                                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                            </button>
+                            <div id="moderasiPageNumbers" class="d-flex align-items-center gap-1"></div>
+                            <button type="button" class="btn btn-sm btn-outline-success rounded-circle page-arrow" id="moderasiNext" aria-label="Halaman berikutnya">
+                                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <small class="page-info text-muted d-block" id="moderasiPageInfo">0 laporan</small>
                     </div>
                 </div>
 
@@ -477,6 +640,8 @@
 
         let activeRegion = 'unesa-lidah-wetan';
         let rawReportsList = [];
+        let moderationPage = 1;
+        const moderationPageSize = 4;
         let sosModalInstance = null;
         const adminMap = L.map('adminMap').setView(regionConfigs[activeRegion].center, regionConfigs[activeRegion].zoom);
 
@@ -752,7 +917,7 @@
         }
 
         // Filter tabel moderasi
-        function filterReportsByStatus() {
+        function filterReportsByStatus(resetPage = true) {
             const filter = document.getElementById('filterStatus')?.value || 'all';
             const search = document.getElementById('searchModerasiInput')?.value.trim().toLowerCase() || '';
             let filtered = rawReportsList;
@@ -769,36 +934,48 @@
                     r.status
                 ].some(value => String(value || '').toLowerCase().includes(search)));
             }
+            if (resetPage) moderationPage = 1;
             renderReportsTable(filtered);
         }
 
         function renderReportsTable(reports) {
             const tbody = document.getElementById('reportsTableBody');
+            const pagination = document.getElementById('moderasiPagination');
+            const pageInfo = document.getElementById('moderasiPageInfo');
+            const pageNumbers = document.getElementById('moderasiPageNumbers');
+            const previousButton = document.getElementById('moderasiPrevious');
+            const nextButton = document.getElementById('moderasiNext');
             if (!tbody) return;
 
             if (reports.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted small">Tidak ada laporan dengan filter status ini.</td></tr>';
+                tbody.innerHTML = '<div class="text-center py-4 text-muted small">Tidak ada laporan dengan filter status ini.</div>';
+                pagination?.classList.add('d-none');
+                if (pageNumbers) pageNumbers.innerHTML = '';
                 return;
             }
 
+            const totalPages = Math.max(1, Math.ceil(reports.length / moderationPageSize));
+            moderationPage = Math.min(Math.max(moderationPage, 1), totalPages);
+            const pageReports = reports.slice((moderationPage - 1) * moderationPageSize, moderationPage * moderationPageSize);
             let html = '';
-            reports.forEach(rep => {
+            pageReports.forEach(rep => {
                 const badgeClass = rep.status === 'VERIFIED' ? 'bg-success' : (rep.status === 'PENDING_MODERATION' ? 'bg-warning text-dark' : (rep.status === 'RESOLVED' ? 'bg-info text-dark' : (rep.status === 'HIDDEN' ? 'bg-dark' : 'bg-secondary')));
                 
                 html += `
-                    <tr>
-                        <td class="py-3">
-                            <strong class="text-dark d-block">#${rep.id} · ${escapeHtml(rep.label || rep.category)}</strong>
-                            <small class="text-muted d-block text-truncate" style="max-width: 250px;">${escapeHtml(rep.description || 'Tidak ada deskripsi.')}</small>
-                        </td>
-                        <td><span class="badge bg-light text-dark border">${escapeHtml(rep.region_slug)}</span></td>
-                        <td><small class="text-secondary fw-semibold">${escapeHtml(rep.category)}</small></td>
-                        <td>
-                            <span class="badge ${badgeClass} px-2 py-1 rounded-pill mb-1" style="font-size: 10px;">${escapeHtml(rep.status)}</span><br>
+                <article class="moderation-card">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                        <div class="min-width-0">
+                            <strong class="text-dark d-block">#${rep.id} · ${escapeHtml(rep.label || rep.category || 'Laporan warga')}</strong>
+                            <small class="text-secondary fw-semibold">${escapeHtml(rep.category || 'Kondisi umum')}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                            <span class="badge ${badgeClass} px-2 py-1 rounded-pill" style="font-size: 10px;">${escapeHtml(rep.status)}</span>
+                            <span class="badge bg-light text-dark border rounded-pill">${escapeHtml(rep.region_slug || 'Global')}</span>
                             <small class="text-muted"><i class="bi bi-hand-thumbs-up me-1"></i>${rep.upvotes_count || 0} Upvote</small>
-                        </td>
-                        <td class="text-end">
-                            <div class="d-flex justify-content-end gap-1 flex-wrap">
+                        </div>
+                    </div>
+                    <p class="moderation-card-description small mb-3 mt-3">${escapeHtml(rep.description || 'Tidak ada deskripsi.')}</p>
+                    <div class="moderation-card-actions">
                                 ${rep.status !== 'VERIFIED' ? `
                                     <button class="btn btn-sm btn-outline-success rounded-pill px-2 py-1 fw-semibold" style="font-size: 11px;" onclick="verifyReport(${rep.id})" title="Official Verification (1-Klik)">
                                         <i class="bi bi-patch-check-fill me-1"></i>Verifikasi
@@ -817,13 +994,29 @@
                                 <button class="btn btn-sm btn-success rounded-pill px-2 py-1 fw-semibold shadow-sm" style="font-size: 11px;" onclick="waFollowupReport(${rep.id})" title="Kirim Tindak Lanjut ke WhatsApp RT/Kelurahan/Satpam (FR-04.4)">
                                     <i class="bi bi-whatsapp me-1"></i>WA RT
                                 </button>
-                            </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </article>
                 `;
             });
 
             tbody.innerHTML = html;
+            pagination?.classList.remove('d-none');
+            if (pageNumbers) {
+                pageNumbers.innerHTML = Array.from({length: totalPages}, (_, index) => {
+                    const page = index + 1;
+                    const activeClass = page === moderationPage ? ' active' : '';
+                    return `<button type="button" class="btn btn-sm btn-outline-secondary rounded-circle page-number${activeClass}" data-page="${page}" aria-label="Halaman ${page}" aria-current="${page === moderationPage ? 'page' : 'false'}">${page}</button>`;
+                }).join('');
+                pageNumbers.querySelectorAll('.page-number').forEach(button => {
+                    button.addEventListener('click', () => {
+                        moderationPage = Number(button.dataset.page);
+                        filterReportsByStatus(false);
+                    });
+                });
+            }
+            if (pageInfo) pageInfo.textContent = `${reports.length} laporan`;
+            if (previousButton) previousButton.disabled = moderationPage === 1;
+            if (nextButton) nextButton.disabled = moderationPage === totalPages;
         }
 
         // AKSI MODERASI (1-KLIK)
@@ -1013,6 +1206,25 @@
             }
         }
 
+        const adminSidebar = document.getElementById('adminSidebar');
+        const adminMenuToggle = document.getElementById('adminMobileMenuToggle');
+        const adminMenuBackdrop = document.getElementById('adminMenuBackdrop');
+        const closeAdminMenu = () => {
+            adminSidebar?.classList.remove('is-open');
+            adminMenuBackdrop?.classList.remove('is-visible');
+            adminMenuToggle?.setAttribute('aria-expanded', 'false');
+        };
+        adminMenuToggle?.addEventListener('click', () => {
+            const isOpen = adminSidebar?.classList.toggle('is-open') || false;
+            adminMenuBackdrop?.classList.toggle('is-visible', isOpen);
+            adminMenuToggle.setAttribute('aria-expanded', String(isOpen));
+        });
+        adminMenuBackdrop?.addEventListener('click', closeAdminMenu);
+        adminSidebar?.querySelectorAll('a').forEach(link => link.addEventListener('click', closeAdminMenu));
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeAdminMenu();
+        });
+
         // Event listener tombol pilihan wilayah
         document.querySelectorAll('.region-toggle').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1020,14 +1232,32 @@
                     b.className = 'btn btn-sm btn-light text-secondary rounded-pill px-3 fw-semibold region-toggle';
                 });
                 this.className = 'btn btn-sm btn-success rounded-pill px-3 fw-semibold region-toggle';
+                const mobileRegionSelect = document.getElementById('mobileRegionSelect');
+                if (mobileRegionSelect) mobileRegionSelect.value = this.dataset.region;
                 loadAdminDashboard(this.dataset.region);
             });
+        });
+
+        const mobileRegionSelect = document.getElementById('mobileRegionSelect');
+        mobileRegionSelect?.addEventListener('change', event => {
+            const matchingButton = document.querySelector(`.region-toggle[data-region="${event.target.value}"]`);
+            matchingButton?.click();
         });
 
         const searchModerasiInput = document.getElementById('searchModerasiInput');
         if (searchModerasiInput) {
             searchModerasiInput.addEventListener('input', filterReportsByStatus);
         }
+        document.getElementById('moderasiPrevious')?.addEventListener('click', () => {
+            if (moderationPage > 1) {
+                moderationPage -= 1;
+                filterReportsByStatus(false);
+            }
+        });
+        document.getElementById('moderasiNext')?.addEventListener('click', () => {
+            moderationPage += 1;
+            filterReportsByStatus(false);
+        });
 
         const adminNavLinks = document.querySelectorAll('[data-admin-nav-target]');
         const mainContent = document.querySelector('.main-content');

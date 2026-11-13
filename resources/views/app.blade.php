@@ -20,7 +20,7 @@
     </x-topbar>
 
     <!-- Filter / Quick Bar di atas Peta -->
-    <div class="bg-white p-3 rounded-4 shadow-sm mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div class="bg-white p-3 rounded-4 shadow-sm mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2 overflow-hidden">
         <x-region-switcher />
         <div class="d-flex align-items-center gap-2">
             <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">

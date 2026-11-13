@@ -30,16 +30,64 @@
         }
         html, body {
             min-height: 100%;
+            max-width: 100%;
             margin: 0;
+            overflow-x: hidden;
             background: var(--ta-background);
             color: var(--ta-ink);
             font-family: 'Plus Jakarta Sans', 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
+        body.ta-sidebar-open { overflow: hidden; }
         .ta-shell { min-height: 100vh; }
         .ta-main {
             min-width: 0;
             padding: 1rem;
-            padding-bottom: 6rem;
+            padding-bottom: 1rem;
+        }
+        .ta-sidebar {
+            background: #fff;
+            border-right: 1px solid #e2e8f0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            left: 0;
+            overflow-y: auto;
+            padding: 1.25rem;
+            position: fixed;
+            top: 0;
+            transform: translateX(-100%);
+            transition: transform .28s ease;
+            width: 275px;
+            z-index: 1060;
+        }
+        .ta-sidebar.is-open { transform: translateX(0); }
+        .ta-sidebar .nav-link {
+            border-radius: 10px;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .ta-sidebar .nav-link:hover,
+        .ta-sidebar .nav-link.active {
+            background: var(--ta-active-bg);
+            color: var(--ta-primary-deep);
+        }
+        .ta-sidebar .nav-link.active {
+            border: 1px solid var(--ta-active-border);
+            font-weight: 600;
+        }
+        .ta-sidebar-backdrop {
+            background: rgba(15, 23, 42, .45);
+            inset: 0;
+            opacity: 0;
+            pointer-events: none;
+            position: fixed;
+            transition: opacity .28s ease;
+            z-index: 1050;
+        }
+        .ta-sidebar-backdrop.is-visible {
+            opacity: 1;
+            pointer-events: auto;
         }
         .ta-content { width: 100%; max-width: 1440px; margin: 0 auto; }
         .ta-card { background: var(--ta-surface); border: 1px solid #e2e8f0; border-radius: 1rem; }
@@ -52,11 +100,39 @@
         nav[aria-label="Navigasi mobile"] a.text-success {
             color: var(--ta-primary-deep) !important;
         }
-        @media (min-width: 768px) {
-            .ta-shell { display: flex; }
-            .ta-desktop-nav { width: 17rem; flex: 0 0 17rem; }
-            .ta-main { flex: 1 1 auto; height: 100vh; overflow-y: auto; padding: 1.5rem; }
+        .ta-topbar-actions {
+            min-width: 0;
+        }
+        @media (min-width: 992px) {
+            .ta-shell { display: block; }
+            .ta-sidebar {
+                transform: translateX(0);
+                width: 260px;
+            }
+            .ta-sidebar-close { display: none; }
+            .ta-main { height: 100vh; margin-left: 260px; overflow-y: auto; padding: 1.5rem; }
             .ta-map { min-height: 440px; }
+        }
+        @media (max-width: 575.98px) {
+            .ta-topbar {
+                align-items: flex-start !important;
+            }
+            .ta-topbar-heading {
+                min-width: 0;
+                flex: 1 1 auto;
+            }
+            .ta-topbar-heading > div {
+                min-width: 0;
+            }
+            .ta-topbar-heading h4 {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .ta-topbar-actions {
+                flex: 1 1 100%;
+                justify-content: flex-start !important;
+            }
         }
         @media (max-width: 374px) {
             .ta-main { padding-left: .75rem; padding-right: .75rem; }
@@ -77,14 +153,21 @@
         .ta-circle-40 { width: 40px !important; height: 40px !important; min-width: 40px; }
         .ta-circle-56 { width: 56px !important; height: 56px !important; min-width: 56px; }
         .ta-circle-64 { width: 64px !important; height: 64px !important; min-width: 64px; }
+        .form-select,
+        select.form-control {
+            font-size: 0.875rem !important;
+            line-height: 1.35 !important;
+            padding: 0.45rem 2.1rem 0.45rem 0.9rem !important;
+            min-height: 38px !important;
+            height: auto !important;
+        }
     </style>
     @stack('styles')
 </head>
 <body>
     <div class="ta-shell">
-        <aside class="ta-desktop-nav d-none d-md-block">
-            <x-navbar />
-        </aside>
+        <x-sidebar />
+        <div class="ta-sidebar-backdrop" id="taSidebarBackdrop" onclick="window.taToggleSidebar()"></div>
 
         <main class="ta-main" id="appMain">
             <div class="ta-content">
@@ -93,7 +176,6 @@
         </main>
     </div>
 
-    <x-bottom-nav />
     <x-sos-button />
     <x-alert-toast />
     <x-confirm-modal />
@@ -106,7 +188,21 @@
         window.taCurrentUser = null;
         document.querySelectorAll('[data-admin-nav="true"]').forEach(item => item.classList.add('d-none'));
 
-        window.taToggleSidebar = function() {};
+        window.taToggleSidebar = function(forceState) {
+            const sidebar = document.getElementById('taCivicSidebar');
+            const backdrop = document.getElementById('taSidebarBackdrop');
+            if (!sidebar || !backdrop) return;
+            const shouldOpen = typeof forceState === 'boolean'
+                ? forceState
+                : !sidebar.classList.contains('is-open');
+            sidebar.classList.toggle('is-open', shouldOpen);
+            backdrop.classList.toggle('is-visible', shouldOpen);
+            document.body.classList.toggle('ta-sidebar-open', shouldOpen);
+        };
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') window.taToggleSidebar(false);
+        });
 
         window.taPromptGuest = function(title, desc) {
             const titleElement = document.getElementById('guestPromptTitle');
@@ -124,7 +220,17 @@
 
             if (!token) {
                 containers.forEach(container => {
-                    container.innerHTML = '<a href="/masuk" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">Masuk</a>';
+                    container.innerHTML = `
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="ta-circle ta-circle-40 bg-light text-secondary">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <div class="min-width-0 flex-grow-1">
+                                <span class="fw-semibold text-dark small d-block text-truncate">Mode Tamu</span>
+                                <small class="text-muted d-block text-truncate">Belum masuk</small>
+                            </div>
+                            <a href="/masuk" class="btn btn-sm btn-outline-success rounded-pill px-2 fw-semibold">Masuk</a>
+                        </div>`;
                 });
                 return;
             }
@@ -143,20 +249,29 @@
                 }
                 containers.forEach(container => {
                     container.innerHTML = `
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light rounded-pill px-3 py-1 d-flex align-items-center gap-2 border shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <span class="rounded-circle ta-circle ta-circle-24 bg-success text-white d-inline-flex justify-content-center align-items-center fw-bold" style="font-size: 11px;">${initial}</span>
-                                <span class="fw-semibold text-dark small">${escapeHtml(user.name)}</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="ta-circle ta-circle-40 bg-success text-white fw-bold" style="font-size: 12px;">${initial}</span>
+                            <div class="min-width-0 flex-grow-1">
+                                <span class="fw-semibold text-dark small d-block text-truncate">${escapeHtml(user.name)}</span>
+                                <small class="text-muted d-block text-truncate">Warga Terverifikasi</small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-danger-subtle text-danger rounded-circle ta-circle ta-circle-38" onclick="window.taLogout()" aria-label="Keluar">
+                                <i class="bi bi-box-arrow-right"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
-                                <li><button class="dropdown-item small text-danger" onclick="window.taLogout()">Keluar</button></li>
-                            </ul>
                         </div>`;
                 });
             } catch (error) {
                 localStorage.removeItem('ta_token');
                 containers.forEach(container => {
-                    container.innerHTML = '<a href="/masuk" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">Masuk</a>';
+                    container.innerHTML = `
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="ta-circle ta-circle-40 bg-light text-secondary"><i class="bi bi-person"></i></span>
+                            <div class="min-width-0 flex-grow-1">
+                                <span class="fw-semibold text-dark small d-block text-truncate">Mode Tamu</span>
+                                <small class="text-muted d-block text-truncate">Belum masuk</small>
+                            </div>
+                            <a href="/masuk" class="btn btn-sm btn-outline-success rounded-pill px-2 fw-semibold">Masuk</a>
+                        </div>`;
                 });
             }
         }

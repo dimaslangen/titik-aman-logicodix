@@ -32,6 +32,7 @@ label{display:block;font-size:13px;font-weight:600;margin:0 0 4px}
 a:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 input:focus-visible{border-color:#15803d;box-shadow:0 0 0 3px rgba(21,128,61,.15)}
 @media(max-width:820px){body{grid-template-columns:1fr}.side{padding:22px}.side h2,.side p,.side small{display:none}.side{flex-direction:row}}
+@media(max-width:420px){.main{padding:20px 12px}.box{width:calc(100% - 24px);margin-inline:12px}.field{padding:10px 11px}}
 </style>
 </head>
 <body>

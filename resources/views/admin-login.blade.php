@@ -51,10 +51,17 @@
             filter: brightness(1.1);
             color: #fff;
         }
+        @media (max-width: 420px) {
+            .login-card {
+                width: calc(100% - 24px);
+                margin-left: 12px !important;
+                margin-right: 12px !important;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="login-card p-4 mx-3">
+    <div class="login-card p-4 p-sm-5 mx-3 mx-sm-auto">
         <div class="text-center mb-4">
             <x-brand-logo id="admin-login-logo" theme="light" size="lg" badge="ADMIN" />
             <h4 class="fw-bold text-dark mt-3 mb-1">TitikAman Admin</h4>

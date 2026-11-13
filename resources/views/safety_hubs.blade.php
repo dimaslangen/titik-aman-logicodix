@@ -15,6 +15,12 @@
         box-shadow: 0 6px 16px rgba(0,0,0,0.06);
         border-color: #0d9488;
     }
+    @media (max-width: 767.98px) {
+        .ta-topbar-actions .form-select {
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
+    }
 </style>
 @endpush
 
@@ -37,7 +43,7 @@
     </x-topbar>
 
     <!-- Info Banner -->
-    <div class="alert border-0 rounded-4 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: #e8f5ed; color: #11653A;" role="status">
+    <div class="alert border-0 rounded-4 shadow-sm p-3 mb-4 d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between flex-wrap gap-3" style="background: #e8f5ed; color: #11653A;" role="status">
         <div class="d-flex align-items-center">
             <div class="text-white p-2 rounded-circle ta-circle ta-circle-40 me-3" style="background: #11653A;">
                 <i class="bi bi-shield-shaded fs-5"></i>
@@ -47,7 +53,7 @@
                 <small class="text-secondary">Rute SafePass memprioritaskan jalur yang melewati titik-titik ini (radius 100 m).</small>
             </div>
         </div>
-        <a href="/rute-saya" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+        <a href="/rute-saya" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold align-self-stretch align-self-md-center">
             Cari Rute Lewat Hub <i class="bi bi-arrow-right ms-1"></i>
         </a>
     </div>
