@@ -4,7 +4,6 @@
         ['route' => 'rute', 'label' => 'Rute Saya', 'icon' => 'bi-signpost-split', 'url' => route('rute')],
         ['route' => 'hubs', 'label' => 'Safety Hub', 'icon' => 'bi-building', 'url' => '/safety-hubs-ui'],
         ['route' => 'lapor', 'label' => 'Lapor Kondisi', 'icon' => 'bi-exclamation-triangle', 'url' => route('lapor')],
-        ['route' => 'admin', 'label' => 'Admin', 'icon' => 'bi-shield-lock', 'url' => route('admin')],
     ];
 @endphp
 
@@ -19,6 +18,13 @@
                 <i class="bi {{ $link['icon'] }}"></i>{{ $link['label'] }}
             </a>
         @endforeach
+        @auth
+            @if(auth()->user()->role === 'admin' || (auth()->user()->is_admin ?? false))
+                <a href="{{ url('/admin') }}" class="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none {{ request()->routeIs('admin') ? 'bg-success-subtle text-success fw-semibold' : 'text-secondary' }}">
+                    <i class="bi bi-shield-lock"></i>Admin
+                </a>
+            @endif
+        @endauth
     </div>
     <div class="mt-auto pt-3 border-top">
         <a href="{{ route('tentang') }}" class="d-flex align-items-center gap-3 mb-3 px-3 py-2 rounded-3 text-decoration-none text-secondary small">
