@@ -455,6 +455,9 @@
     </div>
 
     <!-- Bootstrap 5 JS Bundle & Leaflet JS -->
+    <x-alert-toast />
+    <x-confirm-modal />
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
@@ -572,9 +575,9 @@
                 if (!res.ok) throw new Error(json.message || 'Gagal mengubah status simulasi.');
 
                 loadSimulationStatus();
-                alert(checked ? 'Mode Simulasi Lokasi Uji Juri telah DIAKTIFKAN. Geofence 20 m dilewati untuk pengujian juri.' : 'Mode Simulasi Lokasi dinonaktifkan.');
+                window.taShowAlert(checked ? 'Mode Simulasi Lokasi Uji Juri telah DIAKTIFKAN. Geofence 20 m dilewati untuk pengujian juri.' : 'Mode Simulasi Lokasi dinonaktifkan.', 'success');
             } catch (err) {
-                alert(err.message);
+                window.taShowAlert(err.message, 'danger');
                 loadSimulationStatus();
             }
         }
@@ -691,7 +694,7 @@
 
             } catch (err) {
                 console.error('Error saat memuat dashboard admin:', err);
-                alert(`Gagal memuat data dashboard: ${err.message}`);
+                window.taShowAlert(`Gagal memuat data dashboard: ${err.message}`, 'danger');
             }
         }
 
@@ -825,7 +828,12 @@
 
         // AKSI MODERASI (1-KLIK)
         async function verifyReport(reportId) {
-            if (!confirm(`Berikan Official Verification badge pada laporan #${reportId}?`)) return;
+            if (!await window.taConfirm({
+                title: 'Verifikasi Laporan',
+                message: `Berikan Official Verification badge pada laporan #${reportId}?`,
+                confirmText: 'Verifikasi',
+                variant: 'success'
+            })) return;
             try {
                 const res = await fetch(`${adminApi}/admin/reports/${reportId}/verify`, {
                     method: 'POST',
@@ -833,15 +841,20 @@
                 });
                 const json = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(json.message || 'Gagal memverifikasi laporan.');
-                alert(json.message || 'Laporan berhasil diverifikasi!');
+                window.taShowAlert(json.message || 'Laporan berhasil diverifikasi!', 'success');
                 loadAdminDashboard(activeRegion);
             } catch (err) {
-                alert(err.message);
+                window.taShowAlert(err.message, 'danger');
             }
         }
 
         async function resolveReport(reportId) {
-            if (!confirm(`Tandai laporan #${reportId} sebagai RESOLVED (selesai ditangani)?`)) return;
+            if (!await window.taConfirm({
+                title: 'Tandai Laporan Selesai',
+                message: `Tandai laporan #${reportId} sebagai RESOLVED (selesai ditangani)?`,
+                confirmText: 'Tandai Selesai',
+                variant: 'success'
+            })) return;
             try {
                 const res = await fetch(`${adminApi}/admin/reports/${reportId}/resolve`, {
                     method: 'POST',
@@ -849,15 +862,20 @@
                 });
                 const json = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(json.message || 'Gagal menandai laporan selesai.');
-                alert(json.message || 'Laporan ditandai selesai.');
+                window.taShowAlert(json.message || 'Laporan ditandai selesai.', 'success');
                 loadAdminDashboard(activeRegion);
             } catch (err) {
-                alert(err.message);
+                window.taShowAlert(err.message, 'danger');
             }
         }
 
         async function hideReport(reportId) {
-            if (!confirm(`Sembunyikan laporan #${reportId} (spam/hoax)? Laporan ini tidak akan tampil di publik.`)) return;
+            if (!await window.taConfirm({
+                title: 'Sembunyikan Laporan',
+                message: `Sembunyikan laporan #${reportId} (spam/hoax)? Laporan ini tidak akan tampil di publik.`,
+                confirmText: 'Sembunyikan / Hoax',
+                variant: 'danger'
+            })) return;
             try {
                 const res = await fetch(`${adminApi}/admin/reports/${reportId}/hide`, {
                     method: 'POST',
@@ -865,10 +883,10 @@
                 });
                 const json = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(json.message || 'Gagal menyembunyikan laporan.');
-                alert(json.message || 'Laporan berhasil disembunyikan.');
+                window.taShowAlert(json.message || 'Laporan berhasil disembunyikan.', 'success');
                 loadAdminDashboard(activeRegion);
             } catch (err) {
-                alert(err.message);
+                window.taShowAlert(err.message, 'danger');
             }
         }
 
@@ -886,10 +904,10 @@
                 if (waUrl) {
                     window.open(waUrl, '_blank');
                 } else {
-                    alert('Teks WhatsApp:\n\n' + json.data?.wa_text);
+                    window.taShowAlert('Teks WhatsApp:\n\n' + json.data?.wa_text, 'info');
                 }
             } catch (err) {
-                alert(err.message);
+                window.taShowAlert(err.message, 'danger');
             }
         }
 
@@ -952,7 +970,12 @@
         }
 
         async function resolveSosAlert(sosId) {
-            if (!confirm(`Tutup dan tandai alert SOS #${sosId} sebagai selesai?`)) return;
+            if (!await window.taConfirm({
+                title: 'Selesaikan Alert SOS',
+                message: `Tutup dan tandai alert SOS #${sosId} sebagai selesai?`,
+                confirmText: 'Tandai Selesai',
+                variant: 'success'
+            })) return;
             try {
                 const res = await fetch(`${adminApi}/admin/sos/${sosId}/resolve`, {
                     method: 'POST',
@@ -960,16 +983,21 @@
                 });
                 const json = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(json.message || 'Gagal menyelesaikan SOS.');
-                alert('Alert SOS telah diselesaikan.');
+                window.taShowAlert('Alert SOS telah diselesaikan.', 'success');
                 loadSosAlertsList();
                 loadAdminDashboard(activeRegion);
             } catch (err) {
-                alert(err.message);
+                window.taShowAlert(err.message, 'danger');
             }
         }
 
         async function adminLogout() {
-            if (confirm('Apakah Anda yakin ingin keluar dari Command Center Admin?')) {
+            if (await window.taConfirm({
+                title: 'Keluar dari Command Center?',
+                message: 'Sesi admin akan diakhiri pada perangkat ini.',
+                confirmText: 'Keluar',
+                variant: 'danger'
+            })) {
                 try {
                     await fetch(`${adminApi}/logout`, {
                         method: 'POST',

@@ -164,7 +164,7 @@
             const data = await response.json().catch(() => ({}));
 
             if (response.status === 401) {
-                alert('Sesi login telah berakhir. Silakan masuk kembali.');
+                window.taShowAlert('Sesi login telah berakhir. Silakan masuk kembali.', 'danger');
                 localStorage.removeItem('ta_token');
                 window.location.href = '/masuk';
                 return;
@@ -174,10 +174,10 @@
                 throw new Error(data.message || 'Gagal memberikan Up-Check.');
             }
 
-            alert(data.message || 'Up-Check berhasil dicatat!');
+            window.taShowAlert(data.message || 'Up-Check berhasil dicatat!', 'success');
             loadAppMap(activeRegion).catch(console.error);
         } catch (err) {
-            alert(err.message);
+            window.taShowAlert(err.message, 'danger');
         }
     }
 
@@ -187,7 +187,7 @@
                 ? 'btn btn-sm btn-outline-success active rounded-pill px-3 fw-semibold'
                 : 'btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold';
         });
-        loadAppMap(button.dataset.region).catch(error => alert(error.message));
+        loadAppMap(button.dataset.region).catch(error => window.taShowAlert(error.message, 'danger'));
     }
 
     document.querySelectorAll('[data-region]').forEach(button => button.addEventListener('click', () => selectAppRegion(button)));
@@ -199,7 +199,7 @@
 
         loadAppRegions()
             .then(() => loadAppMap(activeRegion))
-            .catch(error => alert(`Gagal memuat peta: ${error.message}`));
+            .catch(error => window.taShowAlert(`Gagal memuat peta: ${error.message}`, 'danger'));
     });
 </script>
 @endpush

@@ -63,13 +63,13 @@
 
 @section('content')
     <!-- Banner Khusus Live Companion (Jika dibuka dari tautan terbagi) -->
-    <div id="sharedRouteBanner" class="alert alert-success d-none align-items-center justify-content-between p-3 rounded-4 shadow-sm mb-3">
+    <div id="sharedRouteBanner" class="alert alert-success d-none align-items-center justify-content-between p-3 rounded-4 shadow-sm mb-3" role="alert">
         <div class="d-flex align-items-center">
             <div class="bg-success text-white p-2 rounded-circle ta-circle ta-circle-40 me-3">
                 <i class="bi bi-broadcast fs-5"></i>
             </div>
             <div>
-                <h6 class="fw-bold text-dark mb-0">Live Companion — Rute Perjalanan Terbagi</h6>
+                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-info-circle me-1"></i>Live Companion — Rute Perjalanan Terbagi</h6>
                 <small class="text-muted" id="sharedRouteExpires">Tautan berlaku 6 jam sejak dibuat.</small>
             </div>
         </div>
@@ -133,7 +133,7 @@
             </button>
         </div>
 
-        <div id="routeStatus" class="alert d-none py-2 mb-3"></div>
+        <div id="routeStatus" class="alert d-none py-2 mb-3" role="alert"></div>
 
         <!-- Modal Dialog Bagikan Rute Live Companion -->
         <div class="modal fade" id="shareRouteModal" tabindex="-1" aria-labelledby="shareRouteModalLabel" aria-hidden="true">
@@ -246,7 +246,9 @@
         const element = $route('routeStatus');
         if (!element) return;
         element.className = `alert alert-${type} py-2 mb-3`;
-        element.textContent = message;
+        const icon = type === 'success' ? 'bi-check-circle' : (type === 'info' ? 'bi-info-circle' : 'bi-exclamation-triangle');
+        element.innerHTML = `<i class="bi ${icon} me-2" aria-hidden="true"></i><span></span>`;
+        element.querySelector('span').textContent = message;
         element.classList.remove('d-none');
     };
     const formatDuration = seconds => `${Math.round(Number(seconds || 0) / 60)} menit`;
@@ -513,12 +515,12 @@
             shareModalInstance.show();
         } catch (error) {
             if (error.message.includes('Unauthenticated') || error.message.includes('401')) {
-                alert('Sesi login berakhir. Silakan masuk kembali.');
+                window.taShowAlert('Sesi login berakhir. Silakan masuk kembali.', 'danger');
                 localStorage.removeItem('ta_token');
                 window.location.href = '/masuk';
                 return;
             }
-            alert(error.message);
+            window.taShowAlert(error.message, 'danger');
         }
     }
 
@@ -610,7 +612,7 @@
         document.getElementById('cardSafePass').classList.remove('selected');
         document.getElementById('cardTercepat').classList.remove('selected');
         document.getElementById('activeTripPanel').classList.add('d-none');
-        alert('Perjalanan telah diselesaikan. Tetap jaga keselamatan Anda!');
+        window.taShowAlert('Perjalanan telah diselesaikan. Tetap jaga keselamatan Anda!', 'success');
     }
 
     async function loadRouteRegions() {
@@ -700,7 +702,7 @@
             await navigator.clipboard.writeText($route('shareUrl').value);
             $route('copyNotification').textContent = 'Tautan berhasil disalin ke clipboard!';
         } catch (error) {
-            alert(`Tautan tidak dapat disalin otomatis: ${error.message}`);
+            window.taShowAlert(`Tautan tidak dapat disalin otomatis: ${error.message}`, 'danger');
         }
     });
 

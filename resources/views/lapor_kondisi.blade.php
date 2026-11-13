@@ -124,6 +124,40 @@
         <div id="statusKirimLaporan" class="small text-center text-muted mt-2" role="status"></div>
 
     </div>
+
+    <div class="modal fade" id="aiResultModal" tabindex="-1" aria-labelledby="aiResultModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="aiResultModalLabel">Hasil Verifikasi AI Gemini</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span id="aiResultIcon" class="ta-circle ta-circle-56 bg-success-subtle text-success">
+                            <i class="bi bi-shield-check fs-3"></i>
+                        </span>
+                        <div>
+                            <span id="aiResultBadge" class="badge bg-success rounded-pill mb-1">VERIFIED</span>
+                            <h6 id="aiResultTitle" class="fw-bold mb-0">Laporan berhasil diproses</h6>
+                        </div>
+                    </div>
+                    <div class="bg-light rounded-3 p-3 border">
+                        <div class="small text-muted fw-semibold mb-2"><i class="bi bi-stars me-1"></i>Ringkasan Analisis AI Gemini</div>
+                        <p id="aiResultSummary" class="small text-dark mb-0" style="white-space: pre-line;"></p>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4 d-flex flex-column flex-sm-row">
+                    <a href="{{ route('app') }}" class="btn btn-success rounded-pill px-4 flex-grow-1">
+                        <i class="bi bi-map me-1"></i>Lihat di Peta Aman
+                    </a>
+                    <button type="button" class="btn btn-outline-success rounded-pill px-4 flex-grow-1" id="btnAiNewReport">
+                        <i class="bi bi-plus-lg me-1"></i>Buat Laporan Lain
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -156,7 +190,7 @@
             if (btnSwitch) btnSwitch.classList.remove('d-none');
         } catch (err) {
             console.error("Gagal mengakses kamera:", err);
-            alert("Tidak dapat mengakses kamera. Pastikan izin kamera di browser sudah diaktifkan.");
+            window.taShowAlert("Tidak dapat mengakses kamera. Pastikan izin kamera di browser sudah diaktifkan.", 'danger');
         }
     }
 
@@ -230,14 +264,14 @@
                     'Anda perlu masuk atau mendaftar terlebih dahulu agar laporan kondisi jalan dapat diproses dan diverifikasi oleh komunitas.'
                 );
             } else {
-                alert('Silakan masuk terlebih dahulu untuk mengirim laporan.');
+                window.taShowAlert('Silakan masuk terlebih dahulu untuk mengirim laporan.', 'danger');
                 window.location.href = '/masuk';
             }
             return;
         }
         
         if (!description || !capturedPhoto || currentLatitude === null || currentLongitude === null) {
-            alert('Lengkapi deskripsi, foto kamera, dan lokasi GPS terlebih dahulu.');
+            window.taShowAlert('Lengkapi deskripsi, foto kamera, dan lokasi GPS terlebih dahulu.', 'danger');
             return;
         }
 
@@ -252,7 +286,8 @@
         formData.append('photo', capturedPhoto, 'laporan-kondisi.png');
 
         button.disabled = true;
-        status.textContent = 'Mengirim foto dan menunggu verifikasi AI Gemini...';
+        status.className = 'small text-center mt-2 p-3 bg-success-subtle border border-success-subtle rounded-4 text-success';
+        status.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Mengirim foto &amp; memverifikasi kondisi lapangan dengan AI Gemini...';
 
         try {
             const response = await fetch('/api/v1/reports', {
@@ -267,11 +302,12 @@
             // Handle 409 Conflict - Deteksi laporan duplikat dalam radius 20 meter
             if (response.status === 409 && payload.duplicate_report_id) {
                 const desc = payload.duplicate_report?.description ? `"${payload.duplicate_report.description}"` : 'laporan di titik ini';
-                const confirmUpcheck = confirm(
-                    `Laporan serupa sudah dilaporkan dalam radius ≤ 20m:\n` +
-                    `${desc}\n\n` +
-                    `Apakah Anda ingin memberikan Up-Check (konfirmasi) untuk laporan yang sudah ada tersebut?`
-                );
+                const confirmUpcheck = await window.taConfirm({
+                    title: 'Laporan Serupa Terdeteksi',
+                    message: `Laporan serupa sudah dilaporkan dalam radius ≤ 20m: ${desc}\n\nApakah Anda ingin memberikan Up-Check (konfirmasi) untuk laporan yang sudah ada tersebut?`,
+                    confirmText: 'Tetap Kirim Laporan',
+                    variant: 'warning'
+                });
                 if (confirmUpcheck) {
                     status.textContent = 'Mengirimkan Up-Check untuk laporan terdekat...';
                     const upResponse = await fetch(`/api/v1/reports/${payload.duplicate_report_id}/upvote`, {
@@ -280,7 +316,7 @@
                     });
                     const upPayload = await upResponse.json().catch(() => ({}));
                     if (!upResponse.ok) throw new Error(upPayload.message || 'Gagal memberikan Up-Check.');
-                    alert(upPayload.message || 'Berhasil memberikan Up-Check pada laporan yang ada!');
+                    window.taShowAlert(upPayload.message || 'Berhasil memberikan Up-Check pada laporan yang ada!', 'success');
                     window.location.href = '/app';
                     return;
                 } else {
@@ -294,23 +330,45 @@
             const reportStatus = payload.data?.status || payload.status;
             const aiCheck = payload.data?.ai_check || payload.ai_check;
 
-            let successMsg = reportStatus === 'PENDING_MODERATION'
-                ? 'Laporan ditahan untuk moderasi admin karena tidak lolos validasi AI.'
-                : (payload.message || 'Laporan berhasil dikirim.');
-
-            if (aiCheck) {
-                const aiStatus = aiCheck.is_valid === true
-                    ? 'Lolos Validasi AI (UNVERIFIED)'
-                    : 'Ditahan AI / Perlu Moderasi (PENDING_MODERATION)';
-                successMsg += `\n\n[Analisis AI Gemini]\nStatus: ${aiStatus}\nCatatan: ${aiCheck.reason || '-'}`;
+            const isPending = reportStatus === 'PENDING_MODERATION';
+            const aiResultIcon = document.getElementById('aiResultIcon');
+            const aiResultBadge = document.getElementById('aiResultBadge');
+            const aiResultTitle = document.getElementById('aiResultTitle');
+            const aiResultSummary = document.getElementById('aiResultSummary');
+            if (aiResultIcon && aiResultBadge && aiResultTitle && aiResultSummary) {
+                aiResultIcon.className = `ta-circle ta-circle-56 ${isPending ? 'bg-warning-subtle text-warning' : 'bg-success-subtle text-success'}`;
+                aiResultIcon.innerHTML = `<i class="bi ${isPending ? 'bi-hourglass-split' : 'bi-shield-check'} fs-3"></i>`;
+                aiResultBadge.className = `badge ${isPending ? 'bg-warning text-dark' : 'bg-success'} rounded-pill mb-1`;
+                aiResultBadge.textContent = isPending ? 'MENUNGGU MODERASI' : 'VERIFIED';
+                aiResultTitle.textContent = isPending ? 'Laporan masuk antrean moderasi admin' : 'Laporan langsung terverifikasi valid';
+                aiResultSummary.textContent = [
+                    payload.message,
+                    aiCheck?.reason ? `Analisis Gemini: ${aiCheck.reason}` : null
+                ].filter(Boolean).join('\n\n') || 'Laporan berhasil diproses oleh sistem TitikAman.';
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('aiResultModal')).show();
+            } else {
+                window.taShowAlert(payload.message || 'Laporan berhasil dikirim.', 'success');
             }
-            alert(successMsg);
-            window.location.href = '/app';
         } catch (error) {
+            status.className = 'small text-center text-danger mt-2';
             status.textContent = '';
-            alert(error.message);
+            window.taShowAlert(error.message, 'danger');
         } finally {
             button.disabled = false;
+        }
+    }
+
+    function resetLaporanForm() {
+        document.getElementById('deskripsiLaporan').value = '';
+        capturedPhoto = null;
+        const previewContainer = document.getElementById('previewContainer');
+        const imgPreview = document.getElementById('imgPreview');
+        if (previewContainer) previewContainer.classList.add('d-none');
+        if (imgPreview) imgPreview.removeAttribute('src');
+        const status = document.getElementById('statusKirimLaporan');
+        if (status) {
+            status.className = 'small text-center text-muted mt-2';
+            status.textContent = '';
         }
     }
 
@@ -331,6 +389,10 @@
         if (btnKirim) {
             btnKirim.addEventListener('click', kirimLaporan);
         }
+        document.getElementById('btnAiNewReport')?.addEventListener('click', () => {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('aiResultModal')).hide();
+            resetLaporanForm();
+        });
 
         // Cek status mode simulasi juri
         fetch('/api/v1/simulation', {headers: {Accept: 'application/json'}})

@@ -48,7 +48,13 @@
         const notes = document.getElementById('taSosNotesInput')?.value || '';
         const token = localStorage.getItem('ta_token');
 
-        if (!confirm('Peringatan: Apakah Anda benar-benar dalam keadaan darurat dan ingin menyiarkan sinyal SOS ke seluruh petugas patroli?')) {
+        const confirmed = await window.taConfirm({
+            title: 'Kirim Sinyal Darurat SOS?',
+            message: 'Pastikan Anda benar-benar dalam keadaan darurat sebelum menyiarkan sinyal ke seluruh petugas patroli.',
+            confirmText: 'Kirim Sinyal SOS',
+            variant: 'danger'
+        });
+        if (!confirmed) {
             return;
         }
 
@@ -75,9 +81,10 @@
                 if (!res.ok) throw new Error(payload.message || 'Gagal memancarkan sinyal darurat.');
 
                 statusEl.innerHTML = '<span class="text-success fw-bold"><i class="bi bi-check-circle me-1"></i> Sinyal darurat berhasil disiarkan ke petugas patroli!</span>';
-                alert('🚨 Sinyal darurat berhasil disiarkan! Petugas dan sistem patroli telah menerima koordinat Anda.');
+                window.taShowAlert('Sinyal darurat berhasil disiarkan! Petugas dan sistem patroli telah menerima koordinat Anda.', 'success');
             } catch (err) {
                 statusEl.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i> ${err.message}</span>`;
+                window.taShowAlert(err.message, 'danger');
             } finally {
                 btn.disabled = false;
             }

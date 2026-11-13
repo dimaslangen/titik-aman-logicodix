@@ -96,6 +96,7 @@
     <x-bottom-nav />
     <x-sos-button />
     <x-alert-toast />
+    <x-confirm-modal />
     @include('components.guest-prompt-modal')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -26,7 +26,8 @@ label{display:block;font-size:13px;font-weight:600;margin:0 0 4px}
 .field{display:block;width:100%;font:inherit;border:1px solid #cbd5e1;border-radius:8px;padding:11px 12px;margin-bottom:12px}
 .btn{display:block;width:100%;font:inherit;font-weight:800;border:0;border-radius:8px;padding:13px;background:linear-gradient(135deg,#11653a,#2fa33e);color:#fff;cursor:pointer;margin-top:4px}
 .btn:disabled{opacity:.6}
-.err{color:#dc2626;font-size:13px;min-height:18px;margin:0 0 8px}
+.err{color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:13px;min-height:0;margin:0 0 8px;padding:0;display:none}
+.err:not(:empty){display:block;padding:8px 12px}
 .alt{margin:18px 0 0;font-size:13px;color:#64748b;text-align:center}.alt a{color:#2563eb}
 a:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 input:focus-visible{border-color:#15803d;box-shadow:0 0 0 3px rgba(21,128,61,.15)}
