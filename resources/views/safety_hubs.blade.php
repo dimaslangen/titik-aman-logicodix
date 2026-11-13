@@ -1,4 +1,4 @@
-@extends('layouts.base', ['active' => 'hubs'])
+@extends('layouts.app')
 
 @section('title', 'TitikAman - Direktori Safety Hub')
 

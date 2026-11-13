@@ -2,6 +2,7 @@
     $links = [
         ['route' => 'app', 'label' => 'Peta Aman', 'icon' => 'bi-map', 'url' => route('app')],
         ['route' => 'rute', 'label' => 'Rute Saya', 'icon' => 'bi-signpost-split', 'url' => route('rute')],
+        ['route' => 'hubs', 'label' => 'Safety Hub', 'icon' => 'bi-building', 'url' => '/safety-hubs-ui'],
         ['route' => 'lapor', 'label' => 'Lapor Kondisi', 'icon' => 'bi-exclamation-triangle', 'url' => route('lapor')],
         ['route' => 'admin', 'label' => 'Admin', 'icon' => 'bi-shield-lock', 'url' => route('admin')],
     ];
@@ -14,16 +15,15 @@
     <p class="text-uppercase text-muted fw-bold small mb-2">Navigasi</p>
     <div class="d-grid gap-2">
         @foreach($links as $link)
-            <a href="{{ $link['url'] }}" data-admin-nav="{{ $link['route'] === 'admin' ? 'true' : 'false' }}" class="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none {{ $link['route'] === 'admin' ? 'd-none' : '' }} {{ request()->routeIs($link['route']) ? 'bg-success-subtle text-success fw-semibold' : 'text-secondary' }}">
+            <a href="{{ $link['url'] }}" data-admin-nav="{{ $link['route'] === 'admin' ? 'true' : 'false' }}" class="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none {{ $link['route'] === 'admin' ? 'd-none' : '' }} {{ request()->routeIs($link['route']) || ($link['route'] === 'hubs' && request()->is('safety-hubs-ui')) ? 'bg-success-subtle text-success fw-semibold' : 'text-secondary' }}">
                 <i class="bi {{ $link['icon'] }}"></i>{{ $link['label'] }}
             </a>
         @endforeach
     </div>
-    <a href="{{ route('tentang') }}" class="d-flex align-items-center gap-3 mt-4 px-3 py-2 rounded-3 text-decoration-none text-secondary small">
-        <i class="bi bi-info-circle"></i>Tentang TitikAman
-    </a>
-    <div class="mt-auto pt-4 border-top">
-        <div data-ta-auth class="d-flex justify-content-start"></div>
+    <div class="mt-auto pt-3 border-top">
+        <a href="{{ route('tentang') }}" class="d-flex align-items-center gap-3 mb-3 px-3 py-2 rounded-3 text-decoration-none text-secondary small">
+            <i class="bi bi-info-circle"></i>Tentang TitikAman
+        </a>
         <small class="text-muted d-block mt-3">Sistem terhubung · Safety Hub aktif</small>
     </div>
 </nav>
