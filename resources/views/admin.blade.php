@@ -786,6 +786,7 @@
                 const totalReports = Number(totals.reports || 0);
                 const verifiedReports = Number(totals.verified || 0);
                 const pendingModeration = Number(totals.pending_moderation || 0);
+                const pendingAllRegions = Number(totals.pending_all_regions || 0);
                 const unverifiedReports = Number(totals.unverified || 0);
                 const sosOpen = Number(totals.sos_open || 0);
 
@@ -797,7 +798,9 @@
                 document.getElementById('statVerifiedSub').textContent = `${verifiedPct}% dari total laporan`;
 
                 document.getElementById('statPending').textContent = pendingModeration;
-                document.getElementById('statPendingSub').textContent = pendingModeration > 0 ? 'Perlu tindakan moderator' : 'Semua tertinjau';
+                document.getElementById('statPendingSub').textContent = pendingAllRegions > 0
+                    ? `Total semua wilayah: ${pendingAllRegions} laporan`
+                    : 'Semua tertinjau';
                 document.getElementById('badgePendingModeration').textContent = pendingModeration;
 
                 document.getElementById('statSosOpen').textContent = sosOpen;

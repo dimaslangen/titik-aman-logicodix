@@ -30,10 +30,36 @@
         .route-line { stroke-dasharray: 8 8; }
         .gradient-brand { background: linear-gradient(135deg, #11653a, #2fa33e 55%, #80c826); }
         .mobile-menu {
-            max-height: 320px;
+            max-height: 360px;
             opacity: 1;
             overflow: hidden;
+            margin-left: 16px !important;
+            margin-right: 16px !important;
+            padding: 12px !important;
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
             transition: max-height .25s ease, opacity .2s ease;
+        }
+        .mobile-menu > div {
+            gap: 0 !important;
+        }
+        .mobile-menu a {
+            display: block;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border-bottom: 1px solid #E2E8F0;
+            color: #475569;
+            font-weight: 500;
+            transition: background-color .15s ease, color .15s ease;
+        }
+        .mobile-menu a:last-child {
+            border-bottom: 0;
+        }
+        .mobile-menu a:hover {
+            background: #F1F5F9;
+            color: #0F172A;
         }
         .mobile-menu[hidden] {
             display: block;
@@ -84,7 +110,7 @@
                 <button id="mobile-menu-toggle" type="button" class="flex h-10 w-10 shrink-0 aspect-square items-center justify-center rounded-full border border-slate-200 p-0 text-slate-700 lg:hidden" aria-expanded="false" aria-controls="mobile-menu" aria-label="Buka menu"><span class="text-lg">☰</span></button>
             </div>
         </nav>
-        <div id="mobile-menu" class="mobile-menu mx-5 border-t border-slate-200 bg-white py-4 lg:hidden" hidden>
+        <div id="mobile-menu" class="mobile-menu lg:hidden" hidden>
             <div class="grid gap-3 text-sm font-semibold text-slate-600">
                 <a class="py-1 hover:text-emerald-700" href="#fitur">Fitur</a>
                 <a class="py-1 hover:text-emerald-700" href="#cara-kerja">Cara Kerja</a>

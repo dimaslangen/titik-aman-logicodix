@@ -7,12 +7,13 @@ class AdminController extends Controller {
     public function dashboard(Request $r){
         $region=$r->region_slug;
         $q=Report::query(); if($region) $q->where('region_slug',$region);
+        $pendingAllRegions=Report::query()->whereRaw('UPPER(status) IN (?, ?)', ['PENDING_MODERATION','PENDING'])->count();
         // Heatmap = kerapatan laporan per grid ~0.005 derajat (FR-04.2)
         $heat=Report::active()->when($region,fn($x)=>$x->where('region_slug',$region))->get()
             ->groupBy(fn($rep)=> round((float)$rep->lat,3).','.round((float)$rep->lng,3))
             ->map(fn($g,$k)=>['cell'=>$k,'count'=>$g->count(),'verified'=>$g->where('status','VERIFIED')->count()])->values();
         return response()->json(['success'=>true,'data'=>[
-            'totals'=>['reports'=>$q->count(),'verified'=>(clone $q)->where('status','VERIFIED')->count(),'unverified'=>(clone $q)->where('status','UNVERIFIED')->count(),'pending_moderation'=>(clone $q)->where('status','PENDING_MODERATION')->count(),'sos_open'=>SosAlert::where('status','open')->count()],
+            'totals'=>['reports'=>$q->count(),'verified'=>(clone $q)->where('status','VERIFIED')->count(),'unverified'=>(clone $q)->where('status','UNVERIFIED')->count(),'pending_moderation'=>(clone $q)->whereRaw('UPPER(status) IN (?, ?)', ['PENDING_MODERATION','PENDING'])->count(),'pending_all_regions'=>$pendingAllRegions,'sos_open'=>SosAlert::where('status','open')->when($region,fn($x)=>$x->where('region_slug',$region))->count()],
             'heatmap'=>$heat,
             'by_category'=>(clone $q)->selectRaw('category, COUNT(*) c')->groupBy('category')->pluck('c','category'),
             'by_region'=>Report::selectRaw('region_slug, COUNT(*) c')->groupBy('region_slug')->pluck('c','region_slug'),
